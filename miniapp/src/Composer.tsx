@@ -135,9 +135,9 @@ export default function Composer({ lang, onApply }: Props) {
           <p>{t('Pick a block, fill the fields, watch it appear. No tags, no formatting rules.', 'بلوک را انتخاب کن، فیلدها را پر کن، همان لحظه در پیش‌نمایش ببین. بدون تگ و بدون فرمت دستی.')}</p>
         </div>
         <div className="cmp-chips">
-          <span><Layers size={13} /> {t('Blocks', 'بلوک‌ها')}</span>
-          <span><Eye size={13} /> {t('Live preview', 'پیش‌نمایش زنده')}</span>
-          <span><Send size={13} /> {t('Send ready', 'آماده ارسال')}</span>
+          <span className="cmp-step"><b>۱</b> {t('Add blocks', 'بلوک بچین')}</span>
+          <span className="cmp-step"><b>۲</b> {t('Preview', 'پیش‌نمایش')}</span>
+          <span className="cmp-step"><b>۳</b> {t('Send', 'ارسال')}</span>
         </div>
       </header>
 

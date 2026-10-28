@@ -19,3 +19,43 @@
 .label-enhancements{display:flex;align-items:center;gap:16px;margin:-6px 0 20px}.label-enhancements .text-button{font-size:9px;color:#83b89d}.button-builder-preview .rich-content{width:100%;text-align:center}.preview-theme{display:flex;align-items:center;gap:8px!important}.preview-theme>span{margin-right:2px}.modal input:focus-visible,.modal select:focus-visible,.modal textarea:focus-visible{box-shadow:0 0 0 3px #67ca9710}.rich-content a:focus-visible,.rich-content summary:focus-visible{outline:2px solid var(--mint);outline-offset:3px}.rich-content [id]{scroll-margin-top:16px}
 @media(min-width:1201px){.nav-item{font-size:12px}.breadcrumbs{font-size:11px}.panel-title h2{font-size:12px}.button{font-size:11px}.template-card strong{font-size:10px}.template-card>span{font-size:8px}.section-label h3{font-size:11px}.code-area pre,.code-area textarea{font-size:11.5px}.editor-insert-bar>button{font-size:10px}.editor-status{font-size:8px}.page-heading p{font-size:12px}.release-banner>span{font-size:11px}.preview-controls{font-size:9px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+/* ─── polish layer: readability, touch targets, focus and mobile ─────────── */
+:root{
+  font-size:15px;
+  --bg:#0b0f14;--sidebar:#0e1319;--panel:#12181f;--surface:#1a222b;--border:#28323c;--text:#eef3f7;--muted:#96a3b1;--subtle:#6b7787;
+  --mint:#6fe8c0;--mint-dark:#16302a;
+}
+body{line-height:1.6}
+.persian{letter-spacing:0}
+
+.page-heading h1{font-size:26px;letter-spacing:-.5px;line-height:1.35}
+.page-heading p{font-size:12.5px;line-height:1.75}
+.panel-title h2{font-size:12.5px}
+.eyebrow{font-size:9.5px;letter-spacing:1.4px}
+.button{min-height:40px;font-size:12.5px;border-radius:9px;padding:10px 15px}
+.nav-item{height:46px;font-size:12.5px;border-radius:9px}
+.nav-label{font-size:10px}
+
+button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-visible,[tabindex]:focus-visible{
+  outline:2px solid var(--mint);outline-offset:2px;border-radius:8px}
+button{transition:background .16s ease,border-color .16s ease,transform .16s ease,color .16s ease}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+@media (max-width:860px){
+  .sidebar{inset:auto 0 0 0;width:100%;height:64px;flex-direction:row;align-items:center;padding:0 8px;
+    border-right:0;border-top:1px solid var(--border);z-index:40}
+  .brand,.workspace-selector,.nav-label,.sidebar-bottom,.resources-label{display:none!important}
+  .sidebar nav{display:flex;flex-direction:row;gap:4px;width:100%;justify-content:space-around;overflow-x:auto}
+  .nav-item{height:52px;flex:1 0 auto;flex-direction:column;gap:3px;justify-content:center;font-size:10px;margin:0;padding:4px 6px}
+  .nav-item.active:before{display:none}
+  .nav-item>span:nth-child(2){flex:0}
+  .main-shell{margin-left:0;padding-bottom:72px}
+  .topbar{padding:0 14px;height:58px}
+  main{padding:18px 14px 10px}
+  .cmp-grid,.studio-grid{grid-template-columns:1fr!important}
+  .cmp-preview{position:static!important}
+}
+
+.app.light .panel{box-shadow:0 8px 24px #0b1a1410}
+.app.light .nav-item.active{background:#e7f6ef}

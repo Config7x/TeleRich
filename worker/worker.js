@@ -177,15 +177,82 @@ async function webApi(request, env, url) {
 
 function menu(lang, origin) {
   const fa = lang === 'fa';
+  const studio = { text: fa ? '✨ ساخت و ویرایش پست' : '✨ Create & edit a post', web_app: { url: origin }, style: 'primary' };
   return { inline_keyboard: [
-    [{ text: fa ? '✨ استودیوی پیام و پست‌ساز' : '✨ Message & channel studio', web_app: { url: origin }, style: 'primary' }],
-    [{ text: fa ? '📖 راهنمای متن ریچ' : '📖 Rich text guide', callback_data: `list:${lang}:Rich text:0` }, { text: fa ? '🧩 بلوک‌ها' : '🧩 Blocks', callback_data: `list:${lang}:Blocks:0` }],
-    [{ text: fa ? '🖼 راهنمای مدیا' : '🖼 Media guide', callback_data: `list:${lang}:Media:0` }, { text: fa ? '🎨 دمو کامل' : '🎨 Full demo', callback_data: `demo:${lang}:0`, style: 'success' }],
-    [{ text: fa ? '🎁 زیرمجموعه‌گیری و سهمیه' : '🎁 Referrals & quota', callback_data: `quota:${lang}` }],
-    [{ text: 'Bot API 10.3', callback_data: `updates:${lang}` }],
-    [{ text: fa ? '🌐 English' : '🌐 فارسی', callback_data: `home:${fa ? 'en' : 'fa'}` }]
+    [studio],
+    [{ text: fa ? '🎨 قالب‌های آماده' : '🎨 Ready templates', callback_data: `templates:${lang}` }, { text: fa ? '🧩 بلوک‌ها' : '🧩 Blocks', callback_data: `list:${lang}:Blocks:0` }],
+    [{ text: fa ? '📖 متن ریچ' : '📖 Rich text', callback_data: `list:${lang}:Rich text:0` }, { text: fa ? '🖼 مدیا' : '🖼 Media', callback_data: `list:${lang}:Media:0` }],
+    [{ text: fa ? '🚀 دموی کامل' : '🚀 Full demo', callback_data: `demo:${lang}:0`, style: 'success' }, { text: fa ? '🎁 سهمیه من' : '🎁 My quota', callback_data: `quota:${lang}` }],
+    [{ text: fa ? '📚 مرکز راهنما' : '📚 Help center', callback_data: `help:${lang}` }, { text: 'Bot API 10.3', callback_data: `updates:${lang}` }],
+    [{ text: fa ? '🌐 English' : '🌐 فارسی', callback_data: `home:${fa ? 'en' : 'fa'}` }, { text: fa ? 'ℹ️ درباره' : 'ℹ️ About', callback_data: `about:${lang}` }]
   ] };
 }
+
+// Persistent bottom keyboard: the four things people actually do, one tap away.
+function replyBoard(lang, origin) {
+  const fa = lang === 'fa';
+  return { keyboard: [
+    [{ text: fa ? '✨ ساخت پست' : '✨ Create a post', web_app: { url: origin } }, { text: fa ? '🎨 قالب‌ها' : '🎨 Templates' }],
+    [{ text: fa ? '📚 راهنما' : '📚 Guides' }, { text: fa ? '🎁 سهمیه' : '🎁 Quota' }],
+  ], resize_keyboard: true, is_persistent: true, input_field_placeholder: fa ? 'یکی از دکمه‌ها را بزن…' : 'Tap a button…' };
+}
+
+const foot = (lang, origin, extra) => {
+  const fa = lang === 'fa';
+  const row = [{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }];
+  extra && extra.length && row.push(...extra);
+  return { inline_keyboard: [row, [{ text: fa ? '✨ باز کردن استودیو' : '✨ Open studio', web_app: { url: origin }, style: 'primary' }]] };
+};
+
+const TEMPLATES = [
+  { id: 'config', fa: 'پست کانفیگ', en: 'Config post', icon: '🛰', desc: 'بلوک کد کپی‌شو + دکمه‌های کپی و کانال' },
+  { id: 'levels', fa: 'پست چندحالته', en: 'Multi-level post', icon: '📚', desc: 'خلاصه، جزئیات بازشو و سؤال‌های متداول' },
+  { id: 'slides', fa: 'اسلایدشو', en: 'Slideshow', icon: '🎞', desc: 'چند عکس پشت‌سرهم با دکمه' },
+  { id: 'livepoll', fa: 'نظرسنجی زنده', en: 'Live poll', icon: '📊', desc: 'نظرسنجی با تصویر و دکمه اشتراک' },
+  { id: 'notice', fa: 'اطلاعیه', en: 'Announcement', icon: '📣', desc: 'تیتر، متن و دکمهٔ لینک' },
+  { id: 'guide', fa: 'آموزش گام‌به‌گام', en: 'Step-by-step guide', icon: '🧭', desc: 'مراحل شماره‌دار و بخش بازشو' },
+  { id: 'offer', fa: 'پیشنهاد فروش', en: 'Sales offer', icon: '🛍', desc: 'قیمت، مزیت‌ها و دکمه خرید' },
+  { id: 'account', fa: 'معرفی پروفایل', en: 'Account profile', icon: '👤', desc: 'کارت پروفایل با کپی یوزر و پسورد' },
+  { id: 'scratch', fa: 'از صفر', en: 'From scratch', icon: '📝', desc: 'بوم خالی برای شروع آزاد' },
+];
+
+async function templatesPanel(env, chatId, lang, origin, messageId) {
+  const fa = lang === 'fa';
+  const text = `<b>${fa ? '🎨 قالب‌های آماده' : '🎨 Ready templates'}</b>\n\n` +
+    (fa ? 'یکی را انتخاب کن؛ داخل استودیو باز می‌شود، آمادهٔ ویرایش و ارسال. هیچ کدی لازم نیست.' : 'Pick one: it opens in the studio, ready to edit and send. No code needed.') +
+    '\n\n' + TEMPLATES.map((t) => `${t.icon} <b>${fa ? t.fa : t.en}</b> — ${t.desc}`).join('\n');
+  const rows = [];
+  for (let i = 0; i < TEMPLATES.length; i += 2) {
+    rows.push(TEMPLATES.slice(i, i + 2).map((t) => ({ text: `${t.icon} ${fa ? t.fa : t.en}`, callback_data: `tpl:${lang}:${t.id}` })));
+  }
+  rows.push([{ text: fa ? '✨ باز کردن استودیو' : '✨ Open studio', web_app: { url: origin }, style: 'primary' }]);
+  rows.push([{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }]);
+  return plain(env, chatId, text, { inline_keyboard: rows }, messageId);
+}
+
+async function helpCenter(env, chatId, lang, origin, messageId) {
+  const fa = lang === 'fa';
+  const text = `<b>${fa ? '📚 مرکز راهنما' : '📚 Help center'}</b>\n\n` +
+    (fa ? 'سه راه برای یادگیری: راهنماهای متنی، دموی زنده، و خود استودیو با پیش‌نمایش هم‌زمان.' : 'Three ways to learn: written guides, a live demo, and the studio with a live preview.') +
+    '\n\n' +
+    (fa
+      ? '• 📖 <b>متن ریچ</b> — همهٔ تگ‌ها و نمونه‌ها\n• 🧩 <b>بلوک‌ها</b> — جدول، دکمه، بخش بازشو، مدیا\n• 🖼 <b>مدیا</b> — عکس، آلبوم، فایل\n• 🚀 <b>دمو</b> — پستی که همه‌چیز را نشان می‌دهد'
+      : '• 📖 <b>Rich text</b> — every tag with examples\n• 🧩 <b>Blocks</b> — tables, buttons, collapsibles, media\n• 🖼 <b>Media</b> — photos, albums, files\n• 🚀 <b>Demo</b> — one post that shows it all');
+  return plain(env, chatId, text, { inline_keyboard: [
+    [{ text: fa ? '📖 متن ریچ' : '📖 Rich text', callback_data: `list:${lang}:Rich text:0` }, { text: fa ? '🧩 بلوک‌ها' : '🧩 Blocks', callback_data: `list:${lang}:Blocks:0` }],
+    [{ text: fa ? '🖼 مدیا' : '🖼 Media', callback_data: `list:${lang}:Media:0` }, { text: fa ? '🚀 دمو' : '🚀 Demo', callback_data: `demo:${lang}:0`, style: 'success' }],
+    [{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }],
+  ] }, messageId);
+}
+
+async function aboutPanel(env, chatId, lang, origin, messageId) {
+  const fa = lang === 'fa';
+  const text = `<b>TeleRich 7x</b>\n\n${fa ? 'استودیوی ساخت پست ریچ تلگرام — روی Cloudflare Workers.\n\n' : 'Telegram rich post studio — on Cloudflare Workers.\n\n'}` +
+    '<a href="https://t.me/Rich7xbot">@Rich7xbot</a> · <a href="https://t.me/Config7x">@Config7x</a>' +
+    (fa ? '\n\nدستورها: /start /post /ref /about /whoami' : '\n\nCommands: /start /post /ref /about /whoami');
+  return plain(env, chatId, text, foot(lang, origin), messageId);
+}
+
 const back = (lang, origin) => ({ inline_keyboard: [[{ text: lang === 'fa' ? '← بازگشت به منو' : '← Back to menu', callback_data: `home:${lang}` }, { text: lang === 'fa' ? 'باز کردن استودیو' : 'Open studio', web_app: { url: origin }, style: 'primary' }]] });
 async function plain(env, chatId, text, markup, messageId) {
   return telegram(env, messageId ? 'editMessageText' : 'sendMessage', { chat_id: chatId, ...(messageId ? { message_id: messageId } : {}), text, parse_mode: 'HTML', reply_markup: markup, link_preview_options: { is_disabled: true } });
@@ -635,7 +702,7 @@ async function onUpdate(update, env, origin) {
       await telegram(env, 'answerCallbackQuery', { callback_query_id: callback.id, text: lang === 'fa' ? '\u0647\u0646\u0648\u0632 \u0639\u0636\u0648 \u06a9\u0627\u0646\u0627\u0644 \u0646\u06cc\u0633\u062a\u06cc!' : 'Still not a member!', show_alert: true });
       return;
     }
-    await telegram(env, 'answerCallbackQuery', { callback_query_id: callback.id, text: ['home','list','guide','render','demo','updates','publish','edit','delete','quota','bcstgo','bcstno'].includes(action) ? undefined : `Callback: ${callback.data || ''}` });
+    await telegram(env, 'answerCallbackQuery', { callback_query_id: callback.id, text: ['home','list','guide','render','demo','updates','publish','edit','delete','quota','bcstgo','bcstno','templates','help','about','tpl'].includes(action) ? undefined : `Callback: ${callback.data || ''}` });
     if (action === 'quota') return quotaPanel(env, chatId, lang, origin, message.message_id);
     const parts = (callback.data || '').split(':');
     if (action === 'admp') return adminList(env, chatId, lang, origin, Number(parts[2]) || 0);
@@ -644,6 +711,14 @@ async function onUpdate(update, env, origin) {
     if (action === 'bcstgo') return broadcastRun(env, chatId, lang, origin);
     if (action === 'bcstno') { await env.RICHKV.delete('bcast:' + chatId); return plain(env, chatId, lang === 'fa' ? '❌ ارسال همگانی لغو شد.' : '❌ Broadcast cancelled.', back(lang, origin)); }
     if (action === 'home') return home(env, chatId, lang, origin, message.message_id);
+    if (action === 'templates') return templatesPanel(env, chatId, lang, origin, message.message_id);
+    if (action === 'help') return helpCenter(env, chatId, lang, origin, message.message_id);
+    if (action === 'about') return aboutPanel(env, chatId, lang, origin, message.message_id);
+    if (action === 'tpl') {
+      await telegram(env, 'answerCallbackQuery', { callback_query_id: callback.id, text: lang === 'fa' ? 'داخل استودیو باز کن و قالب را انتخاب کن' : 'Open the studio and pick it there' });
+      const tpl = TEMPLATES.find((x) => x.id === arg);
+      return plain(env, chatId, `<b>${tpl ? tpl.icon + ' ' + (lang === 'fa' ? tpl.fa : tpl.en) : 'Template'}</b>\n\n` + (lang === 'fa' ? 'استودیو را باز کن، از نوار قالب‌ها همین را بزن؛ محتوای آماده روی بوم می‌نشیند.' : 'Open the studio and tap it in the template strip; the content lands on your canvas.'), { inline_keyboard: [[{ text: lang === 'fa' ? '✨ باز کردن استودیو' : '✨ Open studio', web_app: { url: origin }, style: 'primary' }], [{ text: lang === 'fa' ? '← قالب‌ها' : '← Templates', callback_data: `templates:${lang}` }, { text: lang === 'fa' ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }]] }, message.message_id);
+    }
     if (action === 'list') return sendList(env, chatId, lang, ['Rich text','Blocks','Media'].includes(arg) ? arg : 'Rich text', Number(page) || 0, origin, message.message_id);
     if (action === 'guide') return sendGuide(env, chatId, lang, Number(arg), origin, message.message_id);
     if (action === 'render') {
@@ -664,7 +739,19 @@ async function onUpdate(update, env, origin) {
   }
   const text = message.text || '';
   const command = text.split(' ')[0];
-  if (['/start','/help','/post'].includes(command)) return home(env, chatId, detectedLang, origin);
+  const board = { '✨ ساخت پست': 'studio', '✨ Create a post': 'studio', '🎨 قالب‌ها': 'templates', '🎨 Templates': 'templates', '📚 راهنما': 'help', '📚 Guides': 'help', '🎁 سهمیه': 'quota', '🎁 Quota': 'quota' };
+  if (board[text.trim()]) {
+    const want = board[text.trim()];
+    if (want === 'studio') return plain(env, chatId, detectedLang === 'fa' ? '✨ استودیو را باز کن؛ از دکمهٔ زیر شروع کن.' : '✨ Open the studio from the button below.', { inline_keyboard: [[{ text: detectedLang === 'fa' ? '✨ باز کردن استودیو' : '✨ Open studio', web_app: { url: origin }, style: 'primary' }]] });
+    if (want === 'templates') return templatesPanel(env, chatId, detectedLang, origin);
+    if (want === 'help') return helpCenter(env, chatId, detectedLang, origin);
+    if (want === 'quota') return quotaPanel(env, chatId, detectedLang, origin);
+  }
+  if (command === '/start') {
+    await telegram(env, 'sendMessage', { chat_id: chatId, text: detectedLang === 'fa' ? 'دکمه‌های زیر همیشه در دسترس‌اند 👇' : 'These buttons stay within reach 👇', reply_markup: replyBoard(detectedLang, origin) });
+    return home(env, chatId, detectedLang, origin);
+  }
+  if (['/help','/post'].includes(command)) return home(env, chatId, detectedLang, origin);
   if (command === '/ref') return quotaPanel(env, chatId, detectedLang, origin);
   if (command === '/stats') return quotaExempt(env, chatId) ? statsReport(env, chatId, detectedLang, origin) : quotaPanel(env, chatId, detectedLang, origin);
   if (command === '/admin') return quotaExempt(env, chatId) ? adminList(env, chatId, detectedLang, origin) : plain(env, chatId, '<b>⛔ فقط مالک ربات.</b>', back(detectedLang, origin));
@@ -740,7 +827,7 @@ export default {
       if (!env.WEBHOOK_SECRET || !await equal(received, env.WEBHOOK_SECRET)) return new Response('Unauthorized', { status: 401 });
       let update;
       try { update = await request.json(); } catch { return new Response('Invalid update', { status: 400 }); }
-      ctx.waitUntil(onUpdate(update, env, (env.PUBLIC_URL || url.origin) + '?v=20261030lib').catch(async error => {
+      ctx.waitUntil(onUpdate(update, env, (env.PUBLIC_URL || url.origin) + '?v=20261031ui').catch(async error => {
         // Log no tokens or source content. User-facing API errors help diagnose unsupported markup/media.
         console.error('TeleRich update error:', error.message);
         const chat = update.message?.chat || update.callback_query?.message?.chat;
