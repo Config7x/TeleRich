@@ -1,7 +1,7 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "telerich",
-  "main": "public/worker.js",
+  "main": "worker/worker.js",
   "workers_dev": true,
   "routes": [
     { "pattern": "telerich.config7x.dpdns.org", "custom_domain": true }

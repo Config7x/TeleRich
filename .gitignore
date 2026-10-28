@@ -1,6 +1,6 @@
 node_modules
-dist
-public/index.js
+miniapp/dist
+worker/index.js
 .wrangler
 
 # local secrets

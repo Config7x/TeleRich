@@ -4,10 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "vite build && node scripts/build-worker.mjs",
-    "preview": "vite preview",
-    "deploy": "npm run build && wrangler deploy"
+    "dev": "vite --config miniapp/vite.config.ts",
+    "build": "vite build --config miniapp/vite.config.ts && node tools/build-worker.mjs",
+    "test": "node --test tests/*.test.mjs",
+    "deploy": "npm run build && wrangler deploy",
+    "preview": "vite preview --config miniapp/vite.config.ts"
   },
   "dependencies": {
     "@types/katex": "^0.16.8",

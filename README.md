@@ -74,7 +74,7 @@
 - شش قالب آماده (پست کانفیگ، اطلاعیه، آموزش، پیشنهاد فروش، معرفی اکانت، از صفر) که در یک لمس بارگذاری و بعد آزادانه ویرایش می‌شوند.
 - پیش‌نمایش زندهٔ هم‌زمان و انتقال یک‌کلیکی به ادیتور برای ارسال؛ پست ساخته‌شده مثل بقیه در استودیو قابل انتشار در کانال است.
 
-- مستندات: [`docs/composer.md`](./docs/composer.md) — راهنمای فارسی سازندهٔ بصری، جدول بلوک‌ها و نکته‌های کاربردی.
+- مستندات: [`docs/architecture.md`](./docs/architecture.md) · [`docs/api.md`](./docs/api.md) · [`docs/self-host.md`](./docs/self-host.md) · [`docs/composer.md`](./docs/composer.md) — راهنمای فارسی سازندهٔ بصری، جدول بلوک‌ها و نکته‌های کاربردی.
 
 ### 🎯 این پروژه به چه دردی می‌خورد؟
 
@@ -136,14 +136,21 @@
 
 ```
 TeleRich/
-├─ public/
-│  ├─ worker.js     # نقطه‌ی ورود Worker (پردازش webhook، API و سرو کردن اپ)
-│  └─ index.js       # فایل خروجی build: وب‌اپ + راهنماها + کد خام worker.js
-├─ src/               # سورس React/TypeScript استودیو (App.tsx, Renderer.tsx, content.ts, ...)
-├─ scripts/
-│  └─ build-worker.mjs  # اسکریپت تولید public/index.js از خروجی Vite و src/content.ts
-├─ wrangler.jsonc     # پیکربندی Cloudflare Worker
-└─ package.json
+├─ worker/              # ورکر کلادفلر: ربات + API استودیو
+│  ├─ worker.js
+│  ├─ index.js          # ساخته‌شده: HTML مینی‌اپ + دادهٔ راهنما
+│  └─ tg-web-app-content.js
+├─ miniapp/             # مینی‌اپ React (تک‌فایل)
+│  ├─ index.html
+│  ├─ vite.config.ts
+│  └─ src/{App,Composer,Renderer,blocks,content}.{tsx,ts}
+├─ tools/build-worker.mjs
+├─ tests/               # node:test
+├─ docs/                # architecture · api · composer · self-host · shots
+├─ media/promo/         # اسلایدهای تبلیغاتی
+├─ banner.png · logo.png
+├─ package.json · wrangler.jsonc · Dockerfile
+└─ README · CHANGELOG · SECURITY · CONTRIBUTING · CODE_OF_CONDUCT
 ```
 
 ### 🛠 دستورات ربات
