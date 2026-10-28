@@ -1,0 +1,9 @@
+node_modules
+dist
+public/index.js
+.wrangler
+
+# local secrets
+.dev.vars
+.env
+.env.*

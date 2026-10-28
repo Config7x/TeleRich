@@ -1,0 +1,22 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "telerich",
+  "main": "public/worker.js",
+  "workers_dev": true,
+  "routes": [
+    { "pattern": "telerich.config7x.dpdns.org", "custom_domain": true }
+  ],
+  "compatibility_date": "2026-09-01",
+  "observability": {
+    "enabled": true
+  },
+  "kv_namespaces": [
+    { "binding": "RICHKV", "id": "d80f9758b59542a3a3a4e930dd60b5a7" }
+  ],
+  "vars": {
+    "FREE_LIMIT": "10",
+    "REF_BONUS": "10",
+    "QUOTA_EXEMPT": "7886358210",
+    "PUBLIC_URL": ""
+  }
+}

@@ -1,0 +1,176 @@
+/* Visual composer — sits on top of the existing design system. */
+.cmp { display: flex; flex-direction: column; gap: 16px; }
+
+.cmp-hero {
+  position: relative; overflow: hidden; border-radius: 20px; padding: 20px 22px;
+  display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; flex-wrap: wrap;
+  background:
+    radial-gradient(120% 160% at 0% 0%, rgba(74,130,196,.35) 0%, transparent 55%),
+    radial-gradient(120% 160% at 100% 20%, rgba(120,86,196,.32) 0%, transparent 60%),
+    linear-gradient(120deg, #101a26 0%, #16202e 60%, #101923 100%);
+  border: 1px solid rgba(120,160,210,.18);
+  box-shadow: 0 18px 40px -28px rgba(0,0,0,.9);
+}
+.cmp-hero::after {
+  content: ''; position: absolute; inset: auto -40% -140% auto; width: 320px; height: 320px;
+  background: radial-gradient(circle, rgba(90,200,163,.22), transparent 65%); pointer-events: none;
+}
+.cmp-hero-copy { max-width: 560px; display: flex; flex-direction: column; gap: 6px; }
+.cmp-eyebrow {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; letter-spacing: .14em;
+  font-weight: 700; color: #7fd8b4; text-transform: uppercase;
+}
+.cmp-hero h2 { margin: 0; font-size: 21px; line-height: 1.5; color: #eef4fa; }
+.cmp-hero p { margin: 0; font-size: 13.5px; line-height: 1.9; color: #9eb0c2; }
+.cmp-chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.cmp-chips span {
+  display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600;
+  padding: 7px 11px; border-radius: 999px; color: #cfe0f0;
+  background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1);
+  backdrop-filter: blur(6px);
+}
+
+.cmp-templates { display: flex; flex-direction: column; gap: 9px; }
+.cmp-strip-head { display: flex; align-items: baseline; gap: 10px; }
+.cmp-strip-head strong { font-size: 13px; color: #dbe7f2; }
+.cmp-strip-head span { font-size: 11.5px; color: #7b8da0; }
+.cmp-strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.cmp-tpl {
+  display: inline-flex; align-items: center; gap: 7px; white-space: nowrap; cursor: pointer;
+  padding: 9px 13px; border-radius: 12px; font-size: 12.5px; color: #cfdcea;
+  background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.02));
+  border: 1px solid rgba(130,170,215,.18); transition: transform .15s, border-color .15s, background .15s;
+}
+.cmp-tpl:hover { transform: translateY(-1px); border-color: rgba(130,190,240,.45); background: rgba(74,130,196,.16); }
+.cmp-tpl-icon { font-size: 15px; }
+
+.cmp-grid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+@media (max-width: 1080px) { .cmp-grid { grid-template-columns: 1fr; } }
+
+.cmp-editor { display: flex; flex-direction: column; gap: 12px; min-width: 0; }
+
+.cmp-palette { display: flex; flex-wrap: wrap; gap: 7px; }
+.cmp-palette button {
+  position: relative; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  padding: 8px 11px; border-radius: 10px; font-size: 12px; color: #c8d7e6;
+  background: #131d29; border: 1px dashed rgba(120,170,220,.28);
+  transition: all .15s;
+}
+.cmp-palette button:hover { background: #182636; border-color: rgba(120,190,240,.6); color: #eaf3fb; }
+.cmp-palette button span { font-size: 12px; opacity: .8; width: 14px; text-align: center; }
+.cmp-plus { opacity: 0; transition: opacity .15s; }
+.cmp-palette button:hover .cmp-plus { opacity: .9; }
+
+.cmp-empty {
+  display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 34px 16px;
+  border-radius: 16px; color: #7d90a4; text-align: center;
+  background: repeating-linear-gradient(45deg, rgba(255,255,255,.015) 0 10px, transparent 10px 20px);
+  border: 1px dashed rgba(130,170,210,.22);
+}
+.cmp-empty p { margin: 0; font-size: 11.5px; }
+
+.cmp-blocks { display: flex; flex-direction: column; gap: 8px; }
+.cmp-block {
+  border-radius: 14px; background: #101923; border: 1px solid rgba(120,160,200,.14);
+  overflow: hidden; transition: border-color .15s, box-shadow .15s;
+}
+.cmp-block.open { border-color: rgba(120,185,240,.42); box-shadow: 0 12px 30px -24px rgba(60,140,220,.9); }
+.cmp-block > header {
+  display: grid; grid-template-columns: 24px auto minmax(0,1fr) auto 18px; align-items: center; gap: 8px;
+  padding: 10px 12px; cursor: pointer;
+}
+.cmp-block-icon {
+  width: 24px; height: 24px; display: grid; place-items: center; border-radius: 7px;
+  font-size: 12px; color: #9fd0ff; background: rgba(74,130,196,.16);
+}
+.cmp-block-name { font-size: 12.5px; font-weight: 600; color: #dbe8f4; }
+.cmp-block-peek {
+  font-size: 11.5px; color: #7e91a5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; text-align: start;
+}
+.cmp-block-tools { display: flex; gap: 2px; opacity: .55; transition: opacity .15s; }
+.cmp-block:hover .cmp-block-tools { opacity: 1; }
+.cmp-block-tools button {
+  display: grid; place-items: center; width: 24px; height: 24px; cursor: pointer; border-radius: 6px;
+  background: transparent; border: 0; color: #9fb2c6;
+}
+.cmp-block-tools button:hover { background: rgba(255,255,255,.07); color: #e8f2fb; }
+.cmp-block-tools button.danger:hover { background: rgba(190,60,60,.22); color: #ffb3b3; }
+.cmp-block-tools button:disabled { opacity: .25; cursor: not-allowed; }
+.cmp-caret { color: #7f93a8; transition: transform .18s; }
+.cmp-block.open .cmp-caret { transform: rotate(180deg); }
+
+.cmp-fields { display: flex; flex-direction: column; gap: 10px; padding: 2px 12px 14px; border-top: 1px solid rgba(120,160,200,.1); }
+.cmp-field { display: flex; flex-direction: column; gap: 5px; }
+.cmp-field > span { font-size: 11px; color: #8ea0b4; }
+.cmp-field input, .cmp-field textarea, .cmp-fields select {
+  width: 100%; padding: 9px 11px; border-radius: 10px; font-size: 13px; color: #eaf2fa;
+  background: #0c141d; border: 1px solid rgba(120,165,210,.2); outline: none; resize: vertical;
+  font-family: inherit;
+}
+.cmp-field input:focus, .cmp-field textarea:focus, .cmp-fields select:focus { border-color: rgba(120,190,240,.65); box-shadow: 0 0 0 3px rgba(74,130,196,.12); }
+.cmp-fields select { max-width: 240px; }
+
+.cmp-seg { display: inline-flex; flex-wrap: wrap; gap: 4px; }
+.cmp-seg button {
+  padding: 7px 11px; border-radius: 9px; font-size: 11.5px; cursor: pointer; color: #b9cadb;
+  background: #0c141d; border: 1px solid rgba(120,165,210,.2);
+}
+.cmp-seg button.on { background: rgba(74,130,196,.26); border-color: rgba(120,190,240,.6); color: #eaf4ff; }
+
+.cmp-check { display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: #a9bbcd; cursor: pointer; }
+.cmp-check input { width: 15px; height: 15px; accent-color: #4a82c4; }
+.cmp-inline { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.cmp-mini {
+  padding: 7px 10px; border-radius: 9px; font-size: 11.5px; cursor: pointer; color: #cfe0f0;
+  background: rgba(74,130,196,.14); border: 1px solid rgba(120,180,235,.28);
+}
+.cmp-mini:hover { background: rgba(74,130,196,.28); }
+
+.cmp-table { display: flex; flex-direction: column; gap: 5px; }
+.cmp-table-row { display: flex; gap: 5px; align-items: center; }
+.cmp-table-row input { flex: 1; min-width: 0; padding: 7px 9px; border-radius: 8px; font-size: 12px; color: #e7f1fa; background: #0c141d; border: 1px solid rgba(120,165,210,.18); }
+.cmp-table-row button, .cmp-x { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; cursor: pointer; background: rgba(190,60,60,.16); border: 0; color: #ffb3b3; flex: 0 0 auto; }
+
+.cmp-btnrow { display: flex; flex-direction: column; gap: 6px; padding: 8px; border-radius: 10px; background: rgba(255,255,255,.02); border: 1px dashed rgba(120,165,210,.18); }
+.cmp-btn { display: grid; grid-template-columns: 1fr; gap: 5px; }
+@media (min-width: 620px) { .cmp-btn { grid-template-columns: 1.1fr .9fr .7fr 1.3fr 24px; align-items: center; } }
+.cmp-btn input, .cmp-btn select { padding: 7px 9px; border-radius: 8px; font-size: 11.5px; color: #e7f1fa; background: #0c141d; border: 1px solid rgba(120,165,210,.18); }
+
+.cmp-preview { position: sticky; top: 14px; display: flex; flex-direction: column; gap: 8px; }
+.cmp-preview.hidden { display: none; }
+.cmp-preview-head { display: flex; align-items: center; justify-content: space-between; font-size: 11.5px; color: #9db0c3; }
+.cmp-preview-head span { display: inline-flex; align-items: center; gap: 6px; }
+.cmp-preview-head button { display: grid; place-items: center; width: 22px; height: 22px; border-radius: 6px; background: transparent; border: 0; color: #8fa3b7; cursor: pointer; }
+.cmp-phone {
+  border-radius: 22px; padding: 12px; max-height: 66vh; overflow: auto;
+  background: linear-gradient(165deg, #0b1119, #101a25);
+  border: 1px solid rgba(130,175,220,.22);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.04), 0 20px 44px -34px #000;
+}
+.cmp-preview-foot { font-size: 10.5px; color: #708499; text-align: end; font-variant-numeric: tabular-nums; }
+.cmp-show-preview {
+  position: fixed; inset: auto 16px 84px auto; z-index: 20; display: inline-flex; align-items: center; gap: 6px;
+  padding: 9px 13px; border-radius: 999px; font-size: 12px; cursor: pointer; color: #eaf3fb;
+  background: #1d3247; border: 1px solid rgba(130,190,240,.45); box-shadow: 0 10px 24px -16px #000;
+}
+
+.cmp-actions {
+  position: sticky; bottom: 0; z-index: 10; display: flex; flex-wrap: wrap; gap: 8px; align-items: center;
+  padding: 12px; border-radius: 16px;
+  background: rgba(12,20,29,.92); backdrop-filter: blur(10px);
+  border: 1px solid rgba(120,165,210,.18);
+}
+.cmp-apply {
+  display: inline-flex; align-items: center; gap: 8px; cursor: pointer;
+  padding: 11px 18px; border-radius: 12px; font-size: 13px; font-weight: 700; color: #04121a;
+  background: linear-gradient(135deg, #6fe3b5, #4ac3d8); border: 0;
+  box-shadow: 0 12px 26px -18px rgba(90,220,190,.9);
+}
+.cmp-apply:hover { filter: brightness(1.06); }
+.cmp-ghost {
+  display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  padding: 10px 14px; border-radius: 11px; font-size: 12px; color: #c9dcea;
+  background: rgba(255,255,255,.04); border: 1px solid rgba(130,175,215,.22);
+}
+.cmp-ghost:hover { background: rgba(255,255,255,.08); }
