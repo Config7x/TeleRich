@@ -3,8 +3,9 @@ import {
   ArrowDown, ArrowUp, Check, ChevronDown, Copy, Layers, Plus, Sparkles, Trash2, Wand2, X, Eye, Send,
 } from 'lucide-react';
 import { RichPreview, detectRtl } from './Renderer';
+import { KINDS, CATS, KIND_MAP, countIn } from './library';
 import {
-  Block, palette, templates, newBlock, blocksToHtml, uid, TgButton,
+  Block, templates, newBlock, newArt, blocksToHtml, uid, TgButton,
 } from './blocks';
 import './composer.css';
 
@@ -26,6 +27,7 @@ const save = (key: string, value: unknown) => {
 };
 
 const labels: Record<Block['kind'], string> = {
+  art: 'کتابخانه',
   heading: 'تیتر',
   text: 'متن',
   quote: 'نقل‌قول',
@@ -42,6 +44,7 @@ const labels: Record<Block['kind'], string> = {
 };
 
 const icons: Record<Block['kind'], string> = {
+  art: '◈',
   heading: 'H',
   text: '¶',
   quote: '❝',
@@ -66,8 +69,19 @@ export default function Composer({ lang, onApply }: Props) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [showPreview, setShowPreview] = useState(true);
+  const [q, setQ] = useState('');
+  const [cat, setCat] = useState('رایج');
+  const shown = useMemo(() => {
+    const needle = q.trim();
+    const base = needle
+      ? KINDS.filter((k) => (k.title + ' ' + k.hint + ' ' + k.cats.join(' ')).includes(needle))
+      : KINDS.filter((k) => k.cats.includes(cat));
+    return base.slice(0, 120);
+  }, [q, cat]);
 
   const html = useMemo(() => blocksToHtml(blocks), [blocks]);
+  const addArt = (key: string) => add(newArt(key));
+
   const commit = (next: Block[]) => {
     setBlocks(next);
     save('tr-blocks', next);
@@ -96,8 +110,8 @@ export default function Composer({ lang, onApply }: Props) {
 
   const remove = (id: string) => commit(blocks.filter((b) => b.id !== id));
 
-  const add = (kind: Block['kind']) => {
-    const block = newBlock(kind);
+  const add = (blockOrKind: Block | Block['kind']) => {
+    const block = typeof blockOrKind === 'string' ? newBlock(blockOrKind) : blockOrKind;
     commit([...blocks, block]);
     setOpenId(block.id);
   };
@@ -151,14 +165,41 @@ export default function Composer({ lang, onApply }: Props) {
 
       <div className="cmp-grid">
         <div className="cmp-editor">
-          <div className="cmp-palette">
-            {palette.map((p) => (
-              <button key={p.kind} onClick={() => add(p.kind)} title={p.hint}>
-                <span>{icons[p.kind]}</span>
-                {p.label}
-                <Plus size={12} className="cmp-plus" />
-              </button>
-            ))}
+          <div className="cmp-lib">
+            <div className="cmp-lib-head">
+              <span className="cmp-lib-title">
+                <Layers size={15} /> {t('Block library', 'کتابخانهٔ بلوک‌ها')}
+                <small>{KINDS.length}</small>
+              </span>
+              <input
+                className="cmp-lib-search"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder={t('Search blocks…', 'جست‌وجو میان بلوک‌ها…')}
+              />
+            </div>
+            <div className="cmp-lib-cats">
+              {CATS.map((cat) => (
+                <button
+                  key={cat}
+                  className={'cmp-chip' + (cat === cat ? ' on' : '')}
+                  onClick={() => setCat(cat)}
+                >
+                  {cat} <small>{countIn(cat)}</small>
+                </button>
+              ))}
+            </div>
+            <div className="cmp-lib-grid">
+              {shown.map((k) => (
+                <button key={k.key} className="cmp-lib-item" onClick={() => addArt(k.key)} title={k.hint}>
+                  <span className="cmp-lib-icon">{k.icon}</span>
+                  <b>{k.title}</b>
+                  <small>{k.hint}</small>
+                  <Plus size={12} className="cmp-plus" />
+                </button>
+              ))}
+              {shown.length === 0 && <p className="cmp-lib-none">{t('No block matches that search.', 'بلوکی با این جست‌وجو پیدا نشد.')}</p>}
+            </div>
           </div>
 
           {blocks.length === 0 && (
@@ -264,6 +305,44 @@ function renderFields(
   t: (en: string, fa: string) => string,
 ) {
   const set = (patch: Record<string, unknown>) => update(block.id, patch);
+
+  if (block.kind === 'art') {
+    const kind = KIND_MAP[block.art];
+    if (!kind) return null;
+    const val = (k: string) => block.v[k] ?? kind.def[k] ?? '';
+    const setField = (k: string, value: string) => set({ v: { ...block.v, [k]: value } });
+    return (
+      <div className="cmp-art">
+        <p className="cmp-art-hint">{kind.icon} <b>{kind.title}</b> — {kind.hint}</p>
+        {kind.fields.map((f) => (
+          <label key={f.k} className="cmp-field">
+            <span>{f.label}</span>
+            {f.type === 'area' || f.type === 'lines' || f.type === 'grid' ? (
+              <textarea
+                rows={f.type === 'area' ? 3 : 4}
+                value={val(f.k)}
+                placeholder={f.ph}
+                onChange={(e) => setField(f.k, e.target.value)}
+              />
+            ) : f.type === 'select' ? (
+              <select value={val(f.k)} onChange={(e) => setField(f.k, e.target.value)}>
+                {(f.options || []).map((o) => <option key={o} value={o}>{o}</option>)}
+              </select>
+            ) : (
+              <input
+                value={val(f.k)}
+                placeholder={f.ph}
+                inputMode={f.type === 'num' ? 'numeric' : undefined}
+                onChange={(e) => setField(f.k, e.target.value)}
+              />
+            )}
+            {f.hint && <small>{f.hint}</small>}
+          </label>
+        ))}
+      </div>
+    );
+  }
+
 
   switch (block.kind) {
     case 'heading':

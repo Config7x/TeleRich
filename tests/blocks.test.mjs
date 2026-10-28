@@ -2,14 +2,14 @@
 // the shipped templates must survive a round trip through the generator.
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
-import { transformSync } from 'esbuild';
+import { execFileSync } from 'node:child_process';
+import { mkdtempSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
-const ts = readFileSync('miniapp/src/blocks.ts', 'utf8');
-const { code } = transformSync(ts, { loader: 'ts', format: 'cjs' });
-const mod = { exports: {} };
-new Function('module', 'exports', code)(mod, mod.exports);
-const { blocksToHtml, templates, palette } = mod.exports;
+const out = join(mkdtempSync(join(tmpdir(), 'tr-blocks-')), 'blocks.mjs');
+execFileSync('npx', ['esbuild', 'miniapp/src/blocks.ts', '--bundle', '--format=esm', `--outfile=${out}`, '--log-level=error']);
+const { blocksToHtml, templates, palette } = await import(out);
 
 const balanced = (html, tag) =>
   (html.match(new RegExp(`<${tag}\\b`, 'g')) || []).length ===

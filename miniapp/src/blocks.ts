@@ -2,6 +2,8 @@
 // The whole point: a user never types a tag. Each block is a few plain fields,
 // and this file is the only place that knows how a block becomes HTML.
 
+import { renderKind, KIND_MAP } from './library';
+
 export type ButtonStyle = 'success' | 'primary' | 'danger';
 export type ButtonType = 'url' | 'copy_text';
 
@@ -27,7 +29,8 @@ export type Block =
   | { id: string; kind: 'details'; summary: string; text: string }
   | { id: string; kind: 'spoiler'; text: string }
   | { id: string; kind: 'time'; unix: string; format: string; label: string }
-  | { id: string; kind: 'math'; latex: string };
+  | { id: string; kind: 'math'; latex: string }
+  | { id: string; kind: 'art'; art: string; v: Record<string, string> };
 
 export const uid = () => Math.random().toString(36).slice(2, 9);
 
@@ -99,6 +102,8 @@ export function blockToHtml(b: Block): string {
         .join('');
       return `<table${flags ? ' ' + flags : ''}>${html}</table>`;
     }
+    case 'art':
+      return renderKind(b.art, b.v).trim();
     case 'buttons': {
       const rows = b.rows.filter((r) => r.length);
       if (!rows.length) return '';
@@ -245,4 +250,32 @@ export const templates: Template[] = [
     icon: '✧',
     build: () => [b('heading'), b('text')],
   },
-];
+  {
+    id: 'levels',
+    name: 'پست چندحالته',
+    icon: '📚',
+    build: () => [
+      newArt('banner'),
+      newArt('tldr'),
+      newArt('quotex'),
+      newArt('faq'),
+      newArt('buttons'),
+    ],
+  },
+  {
+    id: 'slides',
+    name: 'اسلایدشو',
+    icon: '🎞',
+    build: () => [newArt('brandhead'), newArt('slideshow'), newArt('buttons')],
+  },
+  {
+    id: 'livepoll',
+    name: 'نظرسنجی زنده',
+    icon: '📊',
+    build: () => [newArt('heading'), newArt('poll'), newArt('pollimg'), newArt('share')],
+  },];
+
+export function newArt(key: string): Block {
+  const kind = KIND_MAP[key];
+  return { id: uid(), kind: 'art', art: key, v: kind ? { ...kind.def } : {} };
+}
