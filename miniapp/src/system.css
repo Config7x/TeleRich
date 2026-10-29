@@ -89,3 +89,12 @@
 /* a stray 4px radius on table cells and inline code, next to 16px cards */
 .app .guide-example pre,.app .code-box,.app table td,.app table th{border-radius:0}
 .app .guide-example pre{border-radius:var(--r-card);padding:14px}
+
+/* 9 · AI panel: visible state, errors stay on screen ------------------- */
+.app .key-status{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 12px}
+.app .chip{font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;border:1px solid var(--border-soft);color:var(--muted);background:var(--surface);direction:ltr}
+.app .chip.ok{color:var(--mint);border-color:#26443a;background:rgba(99,230,190,.08)}
+.app .chip.warn{color:var(--gold);border-color:#3d3423;background:rgba(245,196,81,.08)}
+.app .ai-msg{margin:10px 0 0;font-size:12.5px;line-height:1.6;padding:10px 12px;border-radius:12px;border:1px solid var(--border-soft);background:var(--surface)}
+.app .ai-msg.ok{color:var(--mint);border-color:#26443a}
+.app .ai-msg.err{color:#ff9a8a;border-color:#5a2b26;background:rgba(255,120,100,.07)}

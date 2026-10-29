@@ -143,8 +143,8 @@
   min-height: 76px;
   padding-inline: 18px;
   border-radius: 20px;
-  background: linear-gradient(135deg, #7bf0cb 0%, #4fdcb4 100%);
-  color: #06231b;
+  background: linear-gradient(180deg, #7eecc9 0%, #43cfa8 100%);
+  color: #04251d;
   border: 1px solid rgba(255, 255, 255, 0.4);
   box-shadow: 0 8px 24px -6px var(--mint-glow), 0 2px 6px rgba(0, 0, 0, 0.15);
   display: flex;

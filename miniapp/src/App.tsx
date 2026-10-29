@@ -45,6 +45,7 @@ export default function App(){
  const effectiveRtl=useMemo(()=>rtlMode==='auto'?detectRtl(source):rtlMode==='rtl',[rtlMode,source]);
  const [modal,setModal]=useState<string|null>(null),[toast,setToast]=useState(''),[mobileNav,setMobileNav]=useState(false);
  const [aiPrompt,setAiPrompt]=useState(''),[aiTone,setAiTone]=useState('professional'),[aiBusy,setAiBusy]=useState(false);
+ const [aiMsg,setAiMsg]=useState<{ok:boolean,text:string}|null>(null);
  const [aiCfg,setAiCfg]=useState<any>(null),[aiKey,setAiKey]=useState(''),[aiProvider,setAiProvider]=useState('xai'),[aiModel,setAiModel]=useState('');
  const [emoSeed,setEmoSeed]=useState<string[]>([]);
  const [emoPacks,setEmoPacks]=useState<any[]>([]),[emoBusy,setEmoBusy]=useState(false),[emoPack,setEmoPack]=useState(''),[emoTotal,setEmoTotal]=useState(0);
@@ -134,11 +135,43 @@ export default function App(){
  const navigate=(p:Page)=>{setPage(p);setSearch('');setSelectedGuide(null);setMobileNav(false);};
  const insert=(text:string,wrapEnd='')=>{const el=editor.current;const start=el?.selectionStart??source.length,end=el?.selectionEnd??source.length;const selected=source.slice(start,end);setSource(source.slice(0,start)+text+(wrapEnd?(selected||t('text','متن'))+wrapEnd:'')+source.slice(end));setPage('studio');setTimeout(()=>{editor.current?.focus();const pos=start+text.length+(wrapEnd?(selected||'text').length+wrapEnd.length:0);editor.current?.setSelectionRange(pos,pos);},30);};
  const append=(text:string)=>{setSource(source+(source?'\n\n':'')+text);setPage('studio');};
- const loadAi=async()=>{try{const cfg=await api('ai',{op:'config'});setAiCfg(cfg);setAiProvider(cfg.provider);setAiModel(cfg.model);}catch(e:any){notify(e.message);}};
+ const loadAi=async()=>{
+  setAiMsg(null);
+  const fallback=[{id:'gemini',label:'Google Gemini',model:'gemini-2.0-flash',keyUrl:'aistudio.google.com/apikey'},
+    {id:'xai',label:'xAI Grok',model:'grok-4-fast'},{id:'openrouter',label:'OpenRouter',model:'openai/gpt-4o-mini'},
+    {id:'groq',label:'Groq',model:'llama-3.3-70b-versatile'},{id:'deepseek',label:'DeepSeek',model:'deepseek-chat'}];
+  setAiCfg((c:any)=>({providers:fallback,...(c||{})}));
+  try{
+    const cfg=await api('ai',{op:'config'});
+    setAiCfg(cfg);setAiProvider(cfg.provider);setAiModel(cfg.model);
+  }catch(e:any){
+    setAiMsg({ok:false,text:(e.message||t('Could not read settings.','خواندن تنظیمات نشد.'))+' — '+t('close and reopen the Mini App, then press Save again.','مینی‌اپ را ببند و دوباره باز کن، بعد ذخیره بزن.')});
+  }
+};
  const runAi=async()=>{if(!aiPrompt.trim())return notify(t('Describe your post first.','اول توضیح بده پست درباره چیست.'));
   setAiBusy(true);try{const r=await api('ai',{op:'generate',prompt:aiPrompt,tone:aiTone,lang});setSource(r.html);setMode('html');setModal(null);setPage('studio');notify(t('Draft ready — review it.','پیش‌نویس آماده شد، بازبینی کن.'));}catch(e:any){notify(e.message);}finally{setAiBusy(false);}};
- const saveAi=async()=>{try{const r=await api('ai',{op:'save',provider:aiProvider,model:aiModel,key:aiKey});setAiCfg((c:any)=>({...c,...r}));setAiKey('');notify(t('AI settings saved.','تنظیمات هوش مصنوعی ذخیره شد.'));}catch(e:any){notify(e.message);}};
- const testAi=async()=>{try{const r=await api('ai',{op:'test'});notify(t('Model replied: ','پاسخ مدل: ')+r.reply);}catch(e:any){notify(e.message);}};
+ const saveAi=async()=>{
+  setAiMsg({ok:true,text:t('Saving…','در حال ذخیره…')});
+  try{
+    const r=await api('ai',{op:'save',provider:aiProvider,model:aiModel,key:aiKey});
+    setAiCfg((c:any)=>({...c,...r}));
+    setAiKey('');
+    const ok=Boolean(r.hasKey);
+    setAiMsg({ok,
+      text:ok
+        ? t(`Saved. Key stored for ${r.provider} (${r.model}).`,'ذخیره شد. کلید برای همین سرویس ثبت شد.')+(r.warning? ' · '+r.warning : '')
+        : t('Saved, but no key was received. Paste the key again and press Save.','ذخیره شد ولی کلیدی دریافت نشد. کلید را دوباره بچسبان و ذخیره بزن.')});
+    notify(ok?t('AI key saved ✓','کلید هوش مصنوعی ذخیره شد ✓'):t('No key received','کلیدی دریافت نشد'));
+  }catch(e:any){
+    setAiMsg({ok:false,text:e.message||t('Could not save.','ذخیره نشد.')});
+    notify(e.message);
+  }
+};
+ const testAi=async()=>{
+  setAiMsg({ok:true,text:t('Contacting the model…','در حال تماس با مدل…')});
+  try{const r=await api('ai',{op:'test'});setAiMsg({ok:true,text:t('Model replied: ','پاسخ مدل: ')+r.reply});}
+  catch(e:any){setAiMsg({ok:false,text:e.message||t('Test failed.','تست ناموفق بود.')});notify(e.message);}
+};
  const loadEmoji=async()=>{setEmoBusy(true);try{const r=await api('emoji',{op:'list'});setEmoPacks(r.packs);setEmoTotal(r.total);setEmoSeed(r.seed||[]);}catch(e:any){notify(e.message);}finally{setEmoBusy(false);}};
  const addEmojiPack=async()=>{if(!emoPack.trim())return;setEmoBusy(true);try{const r=await api('emoji',{op:'add',pack:emoPack});setEmoPacks(r.packs);setEmoTotal(r.packs.reduce((n:number,p:any)=>n+p.emojis.length,0));setEmoPack('');notify(t('Pack added.','پک اضافه شد.'));}catch(e:any){notify(e.message);}finally{setEmoBusy(false);}};
  const dropEmojiPack=async(pack:string)=>{try{const r=await api('emoji',{op:'remove',pack});setEmoPacks(r.packs);setEmoTotal(r.packs.reduce((n:number,p:any)=>n+p.emojis.length,0));}catch(e:any){notify(e.message);}};
@@ -271,7 +304,9 @@ export default function App(){
     <div className="field-row"><label className="field"><span>{t('Provider','سرویس‌دهنده')}</span><select value={aiProvider} onChange={e=>{setAiProvider(e.target.value);setAiModel('');}}>{(aiCfg?.providers||[{id:'xai',label:'xAI Grok'}]).map((p:any)=><option key={p.id} value={p.id}>{p.label}</option>)}</select></label>
     <label className="field"><span>{t('Model','مدل')}</span><input value={aiModel} onChange={e=>setAiModel(e.target.value)} placeholder={(aiCfg?.providers||[]).find((p:any)=>p.id===aiProvider)?.model||"model name"}/></label></div>
     <label className="field"><span>{t('API key','کلید API')}</span><input type="password" value={aiKey} onChange={e=>setAiKey(e.target.value)} placeholder={aiProvider==='gemini'?'AIza…':aiProvider==='openrouter'?'sk-or-…':aiProvider==='groq'?'gsk_…':aiProvider==='deepseek'?'sk-…':'xai-…'}/></label>
+    <div className="key-status"><span className={'chip '+(aiCfg?.hasKey?'ok':'warn')}>{aiCfg?.hasKey?t('Key stored','کلید ثبت شده'):t('No key yet','بدون کلید')}</span>{aiCfg?.ownKey&&<span className="chip muted">{t('your own key','کلید شخصی')}</span>}{aiCfg?.provider&&<span className="chip muted">{aiCfg.provider}</span>}</div>
     <div className="modal-actions"><button className="button subtle" onClick={testAi}>{t('Test','تست')}</button><button className="button secondary" onClick={saveAi}>{t('Save','ذخیره')}</button></div>
+    {aiMsg&&<p className={'ai-msg '+(aiMsg.ok?'ok':'err')} role="status">{aiMsg.text}</p>}
    </details>
    <div className="modal-actions"><button className="button primary" disabled={aiBusy} onClick={runAi}><Sparkles size={15}/>{aiBusy?t('Writing…','در حال نوشتن…'):t('Write my post','پست را بنویس')}</button></div>
   </Modal>}

@@ -27,7 +27,7 @@ const safeText = v => String(v ?? '')
 
 import { premiumOff, premiumMarkup, premiumText, stripPremium } from './premium.js';
 import { premiumize as emojiPremiumize, mergeMaps as emojiMergeMaps, SEED_PACKS } from './emoji_engine.js';
-import { aiConfig, aiSave, aiGenerate, aiTest, emojiPacks, emojiAddPack, emojiRemovePack } from './ai.js';
+import { PROVIDERS, aiConfig, aiSave, aiGenerate, aiTest, emojiPacks, emojiAddPack, emojiRemovePack } from './ai.js';
 
 async function telegram(env, method, data = {}) {
   if (!env.BOT_TOKEN) throw fail('BOT_TOKEN is not configured on the Worker.', 503);
@@ -71,7 +71,7 @@ async function authenticate(request, env) {
   const computed = [...new Uint8Array(await hmac(secret, check))].map(v => v.toString(16).padStart(2, '0')).join('');
   if (!await equal(computed, signature)) throw fail('Invalid Telegram session signature.', 401);
   const age = Date.now() / 1000 - Number(params.get('auth_date'));
-  if (!Number.isFinite(age) || age < -30 || age > 3600) throw fail('Your Telegram session expired. Reopen the Mini App.', 401);
+  if (!Number.isFinite(age) || age < -30 || age > 86400) throw fail('Your Telegram session expired. Reopen the Mini App.', 401);
   const user = JSON.parse(params.get('user') || '{}');
   if (!Number.isSafeInteger(user.id)) throw fail('No Telegram user in session.', 401);
   if (!allowed(env, user.id)) throw fail('This bot is restricted to its configured administrators.', 403);
@@ -122,6 +122,9 @@ function validateRich(rich) {
 const copyFields = (source, names) => Object.fromEntries(names.filter(k => source[k] !== undefined).map(k => [k, source[k]]));
 
 async function webApi(request, env, url) {
+  if (url.pathname === '/api/meta' && request.method === 'GET') {
+    return { ok: true, providers: Object.entries(PROVIDERS).map(([id, p]) => ({ id, label: p.label, model: p.model, keyUrl: p.keyUrl })) };
+  }
   if (request.method !== 'POST') throw fail('POST required.', 405);
   if (Number(request.headers.get('content-length') || 0) > 524288) throw fail('Request too large.', 413);
   const identity = await authenticate(request, env);
@@ -786,6 +789,42 @@ async function onUpdate(update, env, origin) {
   if (command === '/stats') return quotaExempt(env, chatId) ? statsReport(env, chatId, detectedLang, origin) : quotaPanel(env, chatId, detectedLang, origin);
   if (command === '/admin') return quotaExempt(env, chatId) ? adminList(env, chatId, detectedLang, origin) : plain(env, chatId, '<b>⛔ فقط مالک ربات.</b>', back(detectedLang, origin));
   if (command === '/broadcast') return quotaExempt(env, chatId) ? broadcastPrompt(env, chatId, detectedLang, origin) : plain(env, chatId, '<b>⛔ فقط مالک ربات.</b>', back(detectedLang, origin));
+  if (command === '/key' || command === '/model' || command === '/ai') {
+    if (!quotaExempt(env, chatId)) return plain(env, chatId, '<b>⛔ فقط مالک ربات</b>', origin);
+    const uid = String(user?.id || chatId);
+    const rest = (message.text || '').trim().slice(command.length).trim();
+    const first = rest.split(/\s+/)[0] || '';
+    const aliasMap = { google: 'gemini', gemini: 'gemini', xai: 'xai', grok: 'xai', openrouter: 'openrouter', groq: 'groq', deepseek: 'deepseek' };
+    const named = aliasMap[first.toLowerCase()];
+    try {
+      if (command === '/ai') {
+        const cfg = await aiConfig(env, uid);
+        const rows = cfg.providers.map((p) => `\u2022 <code>${p.id}</code> — ${p.label} (${p.model})`).join('\n');
+        return plain(env, chatId, `<b>🤖 هوش مصنوعی</b>\n\nسرویس: <code>${cfg.provider}</code>\nمدل: <code>${cfg.model}</code>\nکلید: ${cfg.hasKey ? '✅ ثبت شده' : '⛔ ثبت نشده'}\n\n${rows}\n\nثبت کلید:\n<code>/key gemini AIza...</code>\nمدل دیگر:\n<code>/model gemini-2.5-flash</code>`, origin);
+      }
+      if (command === '/model') {
+        if (!rest) return plain(env, chatId, 'مثال: <code>/model gemini-2.5-flash</code>', origin);
+        const saved = (await env.RICHKV.get('ai:' + uid, 'json')) || {};
+        const r = await aiSave(env, uid, { provider: saved.provider || 'gemini', model: rest });
+        return plain(env, chatId, `✅ مدل روی <code>${r.model}</code> تنظیم شد.`, origin);
+      }
+      const chosen = named || ((await env.RICHKV.get('ai:' + uid, 'json')) || {}).provider || 'gemini';
+      const keyArg = named ? rest.slice(first.length).trim() : rest;
+      if (!keyArg) return plain(env, chatId, 'کلید را بعد از نام سرویس بفرست:\n<code>/key gemini AIza...</code>', origin);
+      const r = await aiSave(env, uid, { provider: chosen, key: keyArg });
+      const warn = r.warning ? `\n\n⚠️ ${r.warning}` : '';
+      return plain(env, chatId, `✅ کلید برای <b>${r.provider}</b> ثبت شد.\nمدل: <code>${r.model}</code>\n\nبرای آزمایش بنویس <code>/aitest</code>.${warn}`, origin);
+    } catch (e) {
+      return plain(env, chatId, `⛔ ${e.message}`, origin);
+    }
+  }
+  if (command === '/aitest') {
+    if (!quotaExempt(env, chatId)) return plain(env, chatId, '<b>⛔ فقط مالک ربات</b>', origin);
+    const uid = String(user?.id || chatId);
+    await plain(env, chatId, '⏳ در حال تماس با مدل…', origin);
+    try { const r = await aiTest(env, uid); return plain(env, chatId, `✅ پاسخ مدل: <code>${r.reply}</code>`, origin); }
+    catch (e) { return plain(env, chatId, `⛔ ${e.message}`, origin); }
+  }
   if (command === '/about') return plain(env, chatId, '<b>Tele Rich 7x</b>\n\n<a href="https://t.me/Rich7xbot">@Rich7xbot</a>\n<a href="https://t.me/Config7x">@Config7x</a>', back(detectedLang, origin));
   if (command === '/whoami') return sendWhoami(env, chatId, detectedLang, origin, user);
   if (command === '/guide' || command === '/markdown') return sendList(env, chatId, detectedLang, 'Rich text', 0, origin);

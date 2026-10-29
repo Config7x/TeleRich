@@ -1,0 +1,150 @@
+/* ────────────────────────────────────────────────────────────────────
+   TeleRich · visual theme
+   Loaded last. Deep blue-charcoal canvas, one warm mint accent, a soft
+   gold for premium touches. Everything sits at low saturation so long
+   editing sessions stay comfortable: no neon, no pure black, no white
+   text on saturated fills.
+   Contrast (WCAG AA, small text):
+     text/bg 13.9:1 · muted/bg 6.6:1 · mint/bg 11.4:1 · gold/bg 10.9:1
+   ──────────────────────────────────────────────────────────────────── */
+:root{
+  --bg:#0a0f14;
+  --sidebar:#0c1218;
+  --panel:#0f161d;
+  --surface:#141d25;
+  --surface-2:#18222c;
+  --editor:#0a1015;
+  --border:#1e2a34;
+  --border-soft:#17222b;
+  --text:#e9f0f5;
+  --muted:#93a3b1;
+  --subtle:#61707d;
+  --mint:#5fe0bd;
+  --mint-soft:#8fe9d2;
+  --mint-dark:#0f2a25;
+  --mint-glow:rgba(95,224,189,.16);
+  --gold:#e7c87e;
+  --danger:#ff8b7a;
+  --blue:#7f9dff;
+  --hairline:rgba(255,255,255,.045);
+  --shadow-1:0 1px 0 rgba(255,255,255,.03) inset,0 1px 2px rgba(0,0,0,.5);
+  --shadow-2:0 1px 0 rgba(255,255,255,.04) inset,0 14px 34px -18px rgba(0,0,0,.85);
+  --shadow-3:0 30px 70px -24px rgba(0,0,0,.9);
+  --ease:cubic-bezier(.22,.8,.3,1);
+}
+.app{
+  background:
+    radial-gradient(760px 340px at 88% -12%,rgba(95,224,189,.07),transparent 62%),
+    radial-gradient(620px 300px at 4% 2%,rgba(127,157,255,.055),transparent 58%),
+    linear-gradient(180deg,#0b1117,#0a0f14 52%)!important;
+  color:var(--text);
+}
+.app.light{
+  --bg:#f4f7f6;--sidebar:#ffffff;--panel:#ffffff;--surface:#eef3f1;--surface-2:#e5ebe8;
+  --border:#d9e3df;--border-soft:#e6ede9;--editor:#fbfdfc;
+  --text:#132420;--muted:#5d6d68;--subtle:#869590;--mint:#0f9d78;--mint-dark:#e0f5ee;
+  --gold:#a5762a;--blue:#3f63d6;
+  --hairline:rgba(12,40,32,.05);
+}
+
+/* ── typography: tighter display, calmer body ───────────────────────── */
+.app h1,.app h2,.app h3,.app .brand>span{font-family:var(--font-display);font-weight:730;letter-spacing:-.025em}
+.app .page-heading h1{font-size:26px;line-height:1.22}
+.app .page-heading p{font-size:12.5px;color:var(--muted);margin-top:4px}
+.app .eyebrow{color:var(--mint);opacity:.72;font-weight:600;letter-spacing:.14em;font-size:10px}
+.app .brand>span{font-weight:800}
+
+/* ── surfaces: hairline + inner highlight, never flat grey ──────────── */
+.app .panel,.app .card,.app .template-card,.app .stat-card,.app .quick-card,.app .cmp-block{
+  background:linear-gradient(180deg,var(--hairline),transparent 46%),var(--panel);
+  border:1px solid var(--border-soft);
+  box-shadow:var(--shadow-1);
+  transition:border-color .2s var(--ease),transform .2s var(--ease),box-shadow .2s var(--ease);
+}
+.app .template-card:hover,.app .quick-card:hover,.app .stat-card:hover{
+  border-color:#274236;transform:translateY(-2px);box-shadow:var(--shadow-2);
+}
+.app .recent-item:hover,.app .list-row:hover{background:var(--surface);border-color:var(--border)}
+
+/* ── hero: the one place allowed to glow ────────────────────────────── */
+.app .home-hero,.app .cmp-hero{
+  position:relative;overflow:hidden;
+  background:
+    radial-gradient(120% 130% at 82% 0%,rgba(95,224,189,.16),transparent 58%),
+    radial-gradient(90% 120% at 0% 100%,rgba(127,157,255,.10),transparent 62%),
+    linear-gradient(180deg,#101a20,#0d151b);
+  border:1px solid #1d3129;
+  box-shadow:0 1px 0 rgba(255,255,255,.04) inset,0 22px 48px -30px rgba(95,224,189,.5);
+}
+.app .home-hero h1,.app .cmp-hero h1{
+  font-size:27px;line-height:1.24;
+  background:linear-gradient(180deg,#ffffff,#c8e6dc 92%);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.app .hero-eyebrow,.app .cmp-eyebrow{color:var(--mint);font-weight:650;letter-spacing:.1em;font-size:10.5px;opacity:.9}
+.app .hero-eyebrow i,.app .cmp-eyebrow i{background:var(--mint);box-shadow:0 0 0 3px rgba(95,224,189,.14)}
+.app .home-hero p,.app .cmp-hero p{color:#a9bcc6}
+
+/* ── buttons: one confident primary, quiet everything else ──────────── */
+.app .button.primary,.app .cmp-apply,.app .hero-cta{
+  background:linear-gradient(180deg,#7eecc9,#43cfa8);
+  color:#04251d;border:1px solid #9af6da;
+  box-shadow:0 1px 0 rgba(255,255,255,.35) inset,0 10px 26px -12px rgba(67,207,168,.55);
+  font-weight:700;
+}
+.app .button.primary:hover,.app .cmp-apply:hover,.app .hero-cta:hover{filter:brightness(1.04)}
+.app .button.primary:active,.app .cmp-apply:active,.app .hero-cta:active{transform:translateY(1px)}
+.app .button.secondary{background:linear-gradient(180deg,var(--surface-2),var(--surface));border-color:#243139;color:var(--text)}
+.app .button.secondary:hover{border-color:#2e4440}
+.app .button.subtle{background:transparent;border-color:var(--border);color:var(--muted)}
+.app .button.subtle:hover{color:var(--text);border-color:#2c3a44}
+.app .cta-ico{background:rgba(4,37,29,.14)!important;border:1px solid rgba(4,37,29,.16)}
+
+/* ── tab bar: glass, one lit dot ────────────────────────────────────── */
+.app .tabbar{
+  background:color-mix(in srgb,var(--sidebar) 86%,transparent);
+  border-top:1px solid var(--border-soft);
+  backdrop-filter:blur(26px) saturate(170%);
+  box-shadow:0 -14px 34px -26px #000;
+}
+.app .tabbar button{color:#7e8b98;transition:color .16s var(--ease),transform .16s var(--ease)}
+.app .tabbar button:active{transform:scale(.94)}
+.app .tabbar button.active{color:var(--mint)}
+.app .tabbar button.active:after{background:var(--mint);box-shadow:0 0 10px rgba(95,224,189,.5)}
+
+/* ── nav / sidebar ─────────────────────────────────────────────────── */
+.app .nav-item{border-radius:10px;color:#8b99a6}
+.app .nav-item:hover{background:rgba(255,255,255,.035);color:var(--text)}
+.app .nav-item.active{
+  color:var(--mint);
+  background:linear-gradient(90deg,rgba(95,224,189,.13),rgba(95,224,189,.03));
+  box-shadow:inset 0 0 0 1px rgba(95,224,189,.16);font-weight:600;
+}
+.app .sidebar{background:linear-gradient(180deg,rgba(95,224,189,.045),transparent 26%),var(--sidebar);border-right:1px solid var(--border-soft)}
+
+/* ── controls ──────────────────────────────────────────────────────── */
+.app input,.app textarea,.app select,.app .field input{
+  background:var(--editor);border:1px solid var(--border);color:var(--text);
+}
+.app input::placeholder,.app textarea::placeholder{color:#5d6b78}
+.app input:focus,.app textarea:focus,.app select:focus{
+  border-color:#2c5c4e;box-shadow:0 0 0 3px rgba(95,224,189,.14);outline:none;
+}
+.app .chip.ok{color:var(--mint);border-color:#22483c;background:rgba(95,224,189,.09)}
+.app .chip.warn{color:var(--gold);border-color:#453a22;background:rgba(231,200,126,.09)}
+.app .template-use-btn,.app .cmp-ghost{background:var(--surface);border-color:var(--border);color:var(--text)}
+.app .template-use-btn:hover,.app .cmp-ghost:hover{border-color:#2f4a41;color:var(--mint)}
+
+/* ── premium accents: gold reserved for "paid/emoji" affordances ────── */
+.app .q-ico.em{color:var(--gold);background:rgba(231,200,126,.10);border-color:#3a3222}
+.app .q-ico.ai{color:var(--mint);background:rgba(95,224,189,.10);border-color:#25443b}
+.app .q-ico.code{color:var(--blue);background:rgba(127,157,255,.10);border-color:#28324f}
+.app .q-ico.tpl{color:var(--muted);background:rgba(255,255,255,.04);border-color:var(--border)}
+.app .stat-ico{background:rgba(255,255,255,.035);border:1px solid var(--border-soft);color:var(--mint)}
+.app .modal{background:linear-gradient(180deg,var(--hairline),transparent 40%),var(--panel);border-color:var(--border)}
+.app .modal-actions{border-color:var(--border-soft)}
+
+/* ── micro-motion, restrained ──────────────────────────────────────── */
+.app .home-stats>*,.app .home-grid>*{transition:transform .2s var(--ease),border-color .2s var(--ease),box-shadow .2s var(--ease)}
+.app .hero-orb{filter:blur(46px);opacity:.5}
+@media (prefers-reduced-motion:reduce){.app *{transition:none!important;animation:none!important}}

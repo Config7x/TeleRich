@@ -26,18 +26,20 @@ export async function aiConfig(env, uid) {
   };
 }
 
+const ALIAS = { google: 'gemini', 'google-gemini': 'gemini', gemini: 'gemini', 'google-ai': 'gemini', x: 'xai', grok: 'xai', or: 'openrouter' };
+
 export async function aiSave(env, uid, body) {
-  const provider = String(body.provider || '').trim();
+  const provider = ALIAS[String(body.provider || '').trim().toLowerCase()] || String(body.provider || '').trim();
   if (!PROVIDERS[provider]) throw Object.assign(new Error('Unknown provider.'), { status: 400 });
   const rec = { provider, model: String(body.model || PROVIDERS[provider].model).slice(0, 80) };
   const incoming = typeof body.key === 'string' ? body.key.trim() : '';
-  if (incoming && provider === 'gemini' && !/^AIza[0-9A-Za-z_-]{20,}$/.test(incoming)) {
-    throw Object.assign(new Error('کلید Gemini باید با AIza شروع شود؛ از aistudio.google.com/apikey بگیرید.'), { status: 400 });
-  }
+  const warning = provider === 'gemini' && incoming && !/^AIza[0-9A-Za-z_-]{20,}$/.test(incoming)
+    ? 'کلید Gemini معمولاً با AIza شروع می‌شود؛ اگر تست شکست خورد از aistudio.google.com/apikey کلید تازه بگیرید.'
+    : '';
   if (incoming) rec.key = incoming.slice(0, 200);
   else { const prev = await env.RICHKV.get('ai:' + uid, 'json'); if (prev?.key) rec.key = prev.key; }
   await env.RICHKV.put('ai:' + uid, JSON.stringify(rec));
-  return { saved: true, provider: rec.provider, model: rec.model, hasKey: Boolean(rec.key || env.AI_KEY) };
+  return { saved: true, provider: rec.provider, model: rec.model, hasKey: Boolean(rec.key || env.AI_KEY), warning };
 }
 
 async function chat(env, uid, messages, maxTokens = 1400) {
