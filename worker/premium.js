@@ -25,7 +25,9 @@ export function resetPremiumCache() {
   CACHE = { at: 0, key: '', map: null };
 }
 
-const ownerOf = (env) => String(env.ADMINS_ID || '').split(/[,\s]+/).filter(Boolean)[0] || '';
+// Whose packs drive the icons: an explicit owner, else the quota-exempt owner id.
+// ADMINS_ID cannot be used blindly — the same value restricts the bot to admins.
+const ownerOf = (env) => String(env.EMOJI_OWNER || env.ADMINS_ID || env.QUOTA_EXEMPT || '').split(/[,\s]+/).filter(Boolean)[0] || '';
 
 /** Map of emoji char (all VS16 variants) → custom_emoji_id, from the owner's packs. */
 export async function premiumMap(env) {

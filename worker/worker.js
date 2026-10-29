@@ -26,6 +26,7 @@ const safeText = v => String(v ?? '')
   .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
 
 import { premiumOff, premiumMap, premiumMarkup, premiumText, stripPremium, markPremiumDead, resetPremiumCache } from './premium.js';
+import { decorateMarkup } from './board.js';
 import { premiumize as emojiPremiumize, mergeMaps as emojiMergeMaps, SEED_PACKS } from './emoji_engine.js';
 import { PROVIDERS, aiConfig, aiSave, aiGenerate, aiTest, emojiPacks, emojiAddPack, emojiRemovePack } from './ai.js';
 
@@ -33,6 +34,7 @@ async function telegram(env, method, data = {}) {
   if (!env.BOT_TOKEN) throw fail('BOT_TOKEN is not configured on the Worker.', 503);
   const send = payload => fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/${method}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
   let outbound = data;
+  if (outbound.reply_markup) outbound.reply_markup = decorateMarkup(outbound.reply_markup);
   const emojiMap = premiumOff(env) ? null : await premiumMap(env);
   if (emojiMap) {
     if (outbound.reply_markup) outbound.reply_markup = premiumMarkup(outbound.reply_markup, emojiMap);
@@ -1146,7 +1148,7 @@ export default {
       if (!env.WEBHOOK_SECRET || !await equal(received, env.WEBHOOK_SECRET)) return new Response('Unauthorized', { status: 401 });
       let update;
       try { update = await request.json(); } catch { return new Response('Invalid update', { status: 400 }); }
-      ctx.waitUntil(onUpdate(update, env, (env.PUBLIC_URL || url.origin) + '?v=20261105d').catch(async error => {
+      ctx.waitUntil(onUpdate(update, env, (env.PUBLIC_URL || url.origin) + '?v=20261105e').catch(async error => {
         // Log no tokens or source content. User-facing API errors help diagnose unsupported markup/media.
         console.error('TeleRich update error:', error.message);
         const chat = update.message?.chat || update.callback_query?.message?.chat;
