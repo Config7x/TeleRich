@@ -5,6 +5,7 @@ import "./system.css";
 import "./theme.css";
 import "./refined.css";
 import "./tg.css";
+import "./ui.css";
 import App from "./App";
 
 createRoot(document.getElementById("root")!).render(

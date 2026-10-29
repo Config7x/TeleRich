@@ -36,6 +36,8 @@ export default function App(){
  const [lang,setLang]=useState<'en'|'fa'>(readStore('tr-lang',((window as any).Telegram?.WebApp?.initDataUnsafe?.user?.language_code||'fa').startsWith('en')?'en':'fa'));
  const t=(en:string,fa:string)=>lang==='fa'?fa:en;
  const [page,setPage]=useState<Page>('home');
+ const [skin,setSkin]=useState<'aurora'|'native'|'lighty'>(() => (localStorage.getItem('tr-skin') as any) || 'aurora');
+ useEffect(()=>{localStorage.setItem('tr-skin',skin);},[skin]);
  const [source,setSourceRaw]=useState<string>(readUser('tr-source',STARTER));
  const [mode,setMode]=useState<string>(readStore('tr-mode','markdown'));
  const [drafts,setDrafts]=useState<Draft[]>(readUser('tr-drafts',[]));
@@ -253,11 +255,31 @@ async function addChannel(){if(!/^(@[A-Za-z][\w]{3,}|-100\d+)$/.test(channelId.t
  ];
  const templateItems=[{icon:MousePointer2,name:t('Rich buttons','دکمه‌های ریچ'),desc:t('Make it interactive','تعامل با مخاطب'),action:()=>setModal('button'),new:true},{icon:Keyboard,name:t('Inline buttons','دکمه‌های اینلاین'),desc:t('Attached below your post','چسبیده به زیر پست'),action:()=>{selectInlineButton('new');setInlineRow(inlineKeyboard.length+1);setModal('inline-button');},new:true},{icon:Zap,name:t('Button showcase','نمایش همه دکمه‌ها'),desc:t('Pick any action type','یکی از انواع دکمه را انتخاب کنید'),action:()=>setModal('button-showcase'),new:true},{icon:Image,name:t('Media & galleries','مدیا و گالری'),desc:t('More than words','فراتر از کلمات'),action:()=>setModal('media')},{icon:Quote,name:t('Quotes & details','نقل‌قول و جزئیات'),desc:t('Give your text depth','متن با جزئیات بیشتر'),action:()=>append('<aside>Great ideas start with a little curiosity.<cite>TeleRich</cite></aside>\n\n<details><summary>There’s more to the story</summary>Your content goes here.</details>')},{icon:Sigma,name:t('Math & formulas','ریاضی و فرمول'),desc:t('Beautifully precise','زیبا و دقیق'),action:()=>append('<tg-math-block>E = mc^2</tg-math-block>')}];
 
- return <div className={'app tg '+(light?'is-light':'')+(lang==='fa'?' persian':'')}>
+ return <div className={'app tg skin-'+skin+' '+(light?'is-light':'')+(lang==='fa'?' persian':'')}>
+  {mobileNav&&<div className="nav-scrim" onClick={()=>setMobileNav(false)}/>}
+  <aside className={'drawer '+(mobileNav?'is-open':'')} aria-hidden={!mobileNav}>
+   <header className="drawer-head">
+    <div className="drawer-brand"><span className="drawer-mark"><Send size={17} fill="currentColor" strokeWidth={1.6}/></span><div><b>TeleRich</b><small>v10.3</small></div></div>
+    <button className="drawer-x" onClick={()=>setMobileNav(false)} aria-label="Close menu"><X size={18}/></button>
+   </header>
+   <nav className="drawer-nav">
+    {([['home',t('Home','خانه'),Send],['compose',t('Build a post','ساخت پست'),Wand2],['templates',t('Templates','الگوها'),Braces],['drafts',t('Drafts','پیش‌نویس‌ها'),FileText],['channels',t('Channels','کانال‌ها'),Megaphone],['guide',t('Guide','راهنما'),BookOpen],['updates',t('What is new','تازه‌ها'),Zap],['studio',t('Code editor','ویرایشگر کد'),Code2],['settings',t('Settings','تنظیمات'),Settings]] as any[]).map(([id,label,Icon]:any)=>
+      <button key={id} className={'drawer-item '+(page===id?'is-active':'')} onClick={()=>navigate(id as Page)}><Icon size={18}/><span>{label}</span>{id==='drafts'&&drafts.length>0&&<i className="tg-badge">{drafts.length}</i>}{id==='studio'&&<em className="drawer-tag">{t('advanced','پیشرفته')}</em>}</button>)}
+   </nav>
+   <div className="drawer-foot">
+    <div className="drawer-label">{t('Appearance','ظاهر')}</div>
+    <div className="skin-row">{(['aurora','native','lighty'] as const).map(k=><button key={k} className={'skin-dot skin-'+k+(skin===k?' is-on':'')} onClick={()=>setSkin(k)} aria-label={k} title={k==='aurora'?'Aurora':k==='native'?'Telegram':'Light'}><i/><span>{k==='aurora'?'Aurora':k==='native'?'Telegram':'Light'}</span></button>)}</div>
+    <div className="drawer-actions">
+     <button className="drawer-mini" onClick={()=>setLang(lang==='en'?'fa':'en')}>{lang==='en'?'EN':'فا'}</button>
+     <button className={'drawer-mini '+(connected?'is-on':'')} onClick={()=>{setModal('connection');setMobileNav(false);}}>{connected?t('Bot connected','ربات متصل'):t('Connect bot','اتصال ربات')}</button>
+    </div>
+   </div>
+  </aside>
   <div className="main-shell">
    <header className="tg-bar">
     <strong>{page==='home'?t('TeleRich','تله‌ریچ'):pageNames[page]}</strong>
     <div className="tg-bar-actions">
+     <button className="tg-burger" onClick={()=>setMobileNav(true)} aria-label={t('Menu','منو')}><Menu size={20}/></button>
      <button className="tg-chip" onClick={()=>setLang(lang==='en'?'fa':'en')} aria-label="Language">{lang==='en'?'EN':'فا'}</button>
      <button className={'tg-chip '+(connected?'is-on':'')} onClick={()=>setModal('connection')}>{connected?t('Connected','متصل'):t('Connect','اتصال')}</button>
     </div>
