@@ -4,7 +4,7 @@ import assert from 'node:assert/strict';
 import { decorateMarkup, buttonLook } from '../worker/board.js';
 
 test('navigation is blue, creation is green, destruction is red', () => {
-  assert.deepEqual(buttonLook({ text: 'منو', callback_data: 'home:fa' }), ['primary', '🏠']);
+  assert.deepEqual(buttonLook({ text: 'منو', callback_data: 'home:fa' }), [null, '🏠']);
   assert.deepEqual(buttonLook({ text: 'قالب‌ها', callback_data: 'tpl:fa:config' }), ['success', '🗂']);
   assert.deepEqual(buttonLook({ text: 'حذف کانال', callback_data: 'destclear:fa' }), ['danger', '🗑']);
 });
@@ -20,7 +20,7 @@ test('a plain label gets an icon, an icon label is left alone', () => {
   assert.equal(kb.inline_keyboard[0][0].text, '🎁 سهمیه');
   assert.equal(kb.inline_keyboard[0][1].text, '⬅️');
   assert.equal(kb.inline_keyboard[0][0].style, 'success');
-  assert.equal(kb.inline_keyboard[0][1].style, 'primary');
+  assert.equal(kb.inline_keyboard[0][1].style, undefined);
 });
 
 test('an existing style is never overwritten', () => {
@@ -56,4 +56,31 @@ test('admin settings sit above the language row, not above everything', async ()
   const src = readFileSync(new URL('../worker/worker.js', import.meta.url), 'utf8');
   assert.match(src, /kb\.inline_keyboard\.splice\(Math\.max\(0, kb\.inline_keyboard\.length - 1\)/);
   assert.ok(!/kb\.inline_keyboard\.unshift\(\[\{ text: lang === 'fa' \? '⚙️ تنظیمات ربات'/.test(src));
+});
+
+test('a row never shows two coloured buttons', () => {
+  const kb = decorateMarkup({
+    inline_keyboard: [[
+      { text: 'قالب‌ها', callback_data: 'templates:fa' },   // success
+      { text: 'سهمیه', callback_data: 'quota:fa' },         // success, must go neutral
+    ]],
+  });
+  assert.equal(kb.inline_keyboard[0][0].style, 'success');
+  assert.equal(kb.inline_keyboard[0][1].style, undefined);
+});
+
+test('danger outranks success inside one row', () => {
+  const kb = decorateMarkup({ inline_keyboard: [[{ text: 'خرید', callback_data: 'quota:fa' }, { text: 'حذف', callback_data: 'destclear:fa' }]] });
+  const [green, red] = kb.inline_keyboard[0];
+  assert.equal(red.style, 'danger');
+  assert.equal(green.style, undefined);
+});
+
+test('navigation rows stay neutral, so the board is not a wall of blue', () => {
+  const kb = decorateMarkup({ inline_keyboard: [[
+    { text: 'بلوک‌ها', callback_data: 'list:fa:Blocks:0' },
+    { text: 'متن ریچ', callback_data: 'list:fa:Rich text:0' },
+  ], [{ text: 'راهنما', callback_data: 'guide:fa' }, { text: 'درباره', callback_data: 'about:fa' }]] });
+  for (const row of kb.inline_keyboard) for (const b of row) assert.equal(b.style, undefined);
+  assert.equal(kb.inline_keyboard[1][0].text, '🎓 راهنما');
 });

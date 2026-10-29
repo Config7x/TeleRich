@@ -3,8 +3,10 @@
 // the set below is deliberately drawn from ONE icon pack (line icons, "Old
 // Icons" by SOUICdsgn) — mixed packs looked like a sticker dump.
 //
-// Palette (agreed with Milad): green = create / pay / get, blue = go / read,
-// red = destructive.
+// Palette (agreed with Milad): green = create / pay / get, red = destructive,
+// blue only for the one primary action of a board, everything else neutral.
+// A wall of blue buttons reads as "no emphasis at all", so colour is a scarce
+// resource here: at most one coloured button per row.
 
 const ICON = /[\p{Extended_Pictographic}\u2B05\u2B06\u2B07\u27A1\u2B95]/u;
 
@@ -15,28 +17,28 @@ function hasIcon(text) {
 }
 
 const PREFIX = [
-  ['home:', ['primary', '🏠']],
-  ['settings:', ['primary', '⚙']],
-  ['guide:', ['primary', '🎓']],
+  ['home:', [null, '🏠']],
+  ['settings:', [null, '⚙']],
+  ['guide:', [null, '🎓']],
   ['templates:', ['success', '🗂']],
   ['tpl:', ['success', '🗂']],
-  ['demo:', ['primary', '▶️']],
-  ['render:', ['primary', '📝']],
-  ['updates:', ['primary', '🔔']],
-  ['about:', ['primary', 'ℹ️']],
+  ['demo:', [null, '▶️']],
+  ['render:', [null, '📝']],
+  ['updates:', [null, '🔔']],
+  ['about:', [null, 'ℹ️']],
   ['quota:', ['success', '🎁']],
   ['joinadd:', ['success', '📌']],
   ['joinrm:', ['danger', '🗑']],
-  ['join:', ['primary', '📌']],
+  ['join:', [null, '📌']],
   ['destuse:', ['success', '✅️']],
   ['destclear:', ['danger', '🗑']],
-  ['dest:', ['primary', '🌐']],
-  ['list:', ['primary', '📄']],
-  ['users:', ['primary', '👥']],
-  ['admp:', ['primary', '📄']],
-  ['admx:', ['primary', '🔣']],
-  ['adm:', ['primary', '🛡']],
-  ['aiset:', ['primary', '🤖']],
+  ['dest:', [null, '🌐']],
+  ['list:', [null, '📄']],
+  ['users:', [null, '👥']],
+  ['admp:', [null, '📄']],
+  ['admx:', [null, '🔣']],
+  ['adm:', [null, '🛡']],
+  ['aiset:', [null, '🤖']],
   ['bcstgo:', ['success', '📤']],
   ['bcstno:', ['danger', '🚫']],
 ];
@@ -45,9 +47,9 @@ const PREFIX = [
 const ADMIN_ACTION = {
   plus: ['success', '➕'],
   minus: ['danger', '➖'],
-  custom: ['primary', '🔣'],
-  unl: ['primary', '♾'],
-  limited: ['primary', '♾'],
+  custom: [null, '🔣'],
+  unl: [null, '♾'],
+  limited: [null, '♾'],
   reset: ['danger', '🔄'],
   block: ['danger', '🚫'],
 };
@@ -92,19 +94,32 @@ function judge(button) {
   if (button.web_app) return ['primary', '🎨'];
   const text = String(button.text || '');
   for (const [re, look] of WORDS) if (re.test(text)) return look;
-  if (button.url) return ['primary', '🔗'];
-  return ['primary', '💬'];
+  if (button.url) return [null, '🔗'];
+  return [null, '💬'];
 }
+
+const OURS = new WeakSet(); // buttons this module coloured, so demotion spares the author's own
 
 function dress(button, {styled = true} = {}) {
   if (!button || typeof button !== 'object') return button;
   const out = { ...button };
   const [style, emoji] = judge(out);
-  if (styled && !out.style) out.style = style;
+  if (styled && !out.style && style) { out.style = style; OURS.add(out); }
   if (typeof out.text === 'string' && out.text.trim() && !hasIcon(out.text) && !out.icon_custom_emoji_id) {
     out.text = `${emoji} ${out.text}`;
   }
   return out;
+}
+
+const RANK = { danger: 3, success: 2, primary: 1 };
+
+/** One colour per row: the strongest wins, the rest go neutral. */
+function balance(row) {
+  const coloured = row.filter((b) => b && b.style && OURS.has(b));
+  if (coloured.length < 2) return row;
+  coloured.sort((a, b) => (RANK[b.style] || 0) - (RANK[a.style] || 0));
+  for (const extra of coloured.slice(1)) delete extra.style;
+  return row;
 }
 
 /** Colour every inline button and give it an icon. Reply keyboards only get icons. */
@@ -112,7 +127,7 @@ export function decorateMarkup(markup) {
   if (!markup || typeof markup !== 'object') return markup;
   const out = { ...markup };
   if (Array.isArray(markup.inline_keyboard)) {
-    out.inline_keyboard = markup.inline_keyboard.map((row) => (Array.isArray(row) ? row.map((b) => dress(b, { styled: true })) : row));
+    out.inline_keyboard = markup.inline_keyboard.map((row) => (Array.isArray(row) ? balance(row.map((b) => dress(b, { styled: true }))) : row));
   }
   if (Array.isArray(markup.keyboard)) {
     out.keyboard = markup.keyboard.map((row) => (Array.isArray(row) ? row.map((b) => dress(b, { styled: false })) : row));
