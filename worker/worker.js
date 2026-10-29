@@ -26,6 +26,7 @@ const safeText = v => String(v ?? '')
   .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
 
 import { premiumOff, premiumMarkup, premiumText, stripPremium } from './premium.js';
+import { aiConfig, aiSave, aiGenerate, aiTest, emojiPacks, emojiAddPack, emojiRemovePack } from './ai.js';
 
 async function telegram(env, method, data = {}) {
   if (!env.BOT_TOKEN) throw fail('BOT_TOKEN is not configured on the Worker.', 503);
@@ -129,6 +130,23 @@ async function webApi(request, env, url) {
   try { data = JSON.parse(raw || '{}'); } catch { throw fail('Invalid JSON.'); }
   const action = url.pathname.slice(5);
   if (action === 'connect') return telegram(env, 'getMe');
+  if (action === 'ai') {
+    const uid = identity.user.id;
+    const op = data.op || 'config';
+    if (op === 'config') return aiConfig(env, uid);
+    if (op === 'save') return aiSave(env, uid, data);
+    if (op === 'test') return aiTest(env, uid);
+    if (op === 'generate') return aiGenerate(env, uid, data);
+    throw fail('Unknown AI action.', 404);
+  }
+  if (action === 'emoji') {
+    const uid = identity.user.id;
+    const op = data.op || 'list';
+    if (op === 'list') return emojiPacks(env, uid);
+    if (op === 'add') return emojiAddPack(env, uid, data, telegram);
+    if (op === 'remove') return emojiRemovePack(env, uid, data);
+    throw fail('Unknown emoji action.', 404);
+  }
   if (action === 'webhook') {
     if (!identity.operator) throw fail('Only the operator may change the webhook.', 403);
     if (!env.WEBHOOK_SECRET) throw fail('Set WEBHOOK_SECRET first.');
@@ -833,7 +851,7 @@ export default {
       if (!env.WEBHOOK_SECRET || !await equal(received, env.WEBHOOK_SECRET)) return new Response('Unauthorized', { status: 401 });
       let update;
       try { update = await request.json(); } catch { return new Response('Invalid update', { status: 400 }); }
-      ctx.waitUntil(onUpdate(update, env, (env.PUBLIC_URL || url.origin) + '?v=20261031nav').catch(async error => {
+      ctx.waitUntil(onUpdate(update, env, (env.PUBLIC_URL || url.origin) + '?v=20261101design').catch(async error => {
         // Log no tokens or source content. User-facing API errors help diagnose unsupported markup/media.
         console.error('TeleRich update error:', error.message);
         const chat = update.message?.chat || update.callback_query?.message?.chat;
