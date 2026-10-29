@@ -137,7 +137,7 @@ h1,h2,h3,h4,.page-heading h1,.brand>span{font-family:var(--font-display);letter-
 
 /* buttons */
 .button{border-radius:var(--r-sm);min-height:40px;font-size:13px;font-weight:600;transition:transform .16s var(--ease),background .16s,border-color .16s,box-shadow .16s}
-.button.primary{background:linear-gradient(180deg,#7eecc9,#43cfa8);color:#04251d;border-color:#93f7d8;box-shadow:0 1px 0 rgba(255,255,255,.25) inset,0 6px 18px -6px var(--mint-glow)}
+.button.primary{background:linear-gradient(180deg,#7bf0cb,#4fdcb4);color:#06231b;border-color:#93f7d8;box-shadow:0 1px 0 rgba(255,255,255,.25) inset,0 6px 18px -6px var(--mint-glow)}
 .button.primary:active{transform:translateY(1px) scale(.995)}
 .button.secondary{background:var(--surface);border-color:var(--border);color:var(--text)}
 .button.subtle{background:transparent;border-color:var(--border);color:var(--muted)}
