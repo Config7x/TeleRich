@@ -299,6 +299,56 @@ async function templatesPanel(env, chatId, lang, origin, messageId) {
 }
 
 
+
+
+async function settingsPanel(env, chatId, lang, origin, messageId) {
+  const fa = lang === 'fa';
+  const d = await readDest(env, chatId);
+  const jl = await joinList(env);
+  const text = `<b>${fa ? '⚙️ تنظیمات ربات' : '⚙️ Bot settings'}</b>\n\n` +
+    `${fa ? '🎯 مقصد ارسال' : '🎯 Destination'}: <b>${d ? destLabel(d) : (fa ? 'انتخاب نشده' : 'not set')}</b>\n` +
+    `${fa ? '🔒 عضویت اجباری' : '🔒 Forced join'}: <b>${jl.length ? jl.map((t) => t.title || t.id).join(' + ') : (fa ? 'خاموش' : 'off')}</b>`;
+  return plain(env, chatId, text, { inline_keyboard: [
+    [{ text: fa ? '🎯 مقصد ارسال' : '🎯 Destination', callback_data: `dest:${lang}` }, { text: fa ? '🔒 عضویت اجباری' : '🔒 Forced join', callback_data: `join:${lang}` }],
+    [{ text: fa ? '🤖 هوش مصنوعی' : '🤖 AI', callback_data: `aiset:${lang}` }, { text: fa ? '👥 کاربران' : '👥 Users', callback_data: `users:${lang}` }],
+    [{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }, { text: fa ? '✨ استودیو' : '✨ Studio', web_app: { url: origin }, style: 'primary' }]
+  ] }, messageId);
+}
+async function aiPanel(env, chatId, lang, origin, messageId) {
+  const fa = lang === 'fa';
+  const cfg = await aiConfig(env, String(chatId));
+  const rows = cfg.providers.map((p) => `• <code>${p.id}</code> — ${p.label} (${p.model})`).join('\n');
+  const text = `<b>${fa ? '🤖 هوش مصنوعی' : '🤖 AI'}</b>\n\n` +
+    `${fa ? 'سرویس' : 'Service'}: <code>${cfg.provider}</code>\n${fa ? 'مدل' : 'Model'}: <code>${cfg.model}</code>\n` +
+    `${fa ? 'کلید' : 'Key'}: ${cfg.hasKey ? '✅' : '⛔'}\n\n${rows}\n\n` +
+    (fa ? 'ثبت کلید:\n<code>/key gemini AIza...</code>\nآزمایش: <code>/aitest</code>\nتغییر مدل: <code>/model gemini-2.5-flash</code>'
+        : 'Save a key:\n<code>/key gemini AIza...</code>\nTest: <code>/aitest</code>\nModel: <code>/model gemini-2.5-flash</code>');
+  return plain(env, chatId, text, { inline_keyboard: [[{ text: fa ? '⚙️ تنظیمات' : '⚙️ Settings', callback_data: `settings:${lang}` }, { text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }]] }, messageId);
+}
+
+async function joinPanel(env, chatId, lang, origin, messageId) {
+  const fa = lang === 'fa';
+  const list = await joinList(env);
+  const me = await telegram(env, 'getMe');
+  const checked = [];
+  for (const t of list) {
+    let reachable = true;
+    try { const m = await telegram(env, 'getChatMember', { chat_id: t.id, user_id: me.id }); reachable = !['left', 'kicked'].includes(m.status); }
+    catch (e) { reachable = false; }
+    checked.push({ ...t, reachable });
+  }
+  const text = `<b>${fa ? '🔒 عضویت اجباری' : '🔒 Forced join'}</b>\n\n` +
+    (fa ? 'کاربر تا وقتی در همهٔ این‌ها عضو نشود نمی‌تواند از ربات استفاده کند.' : 'Users must join all of these before the bot works.') +
+    '\n\n' + (checked.length ? checked.map((t) => `• ${t.type === 'group' || t.type === 'supergroup' ? '👥' : '📡'} <b>${t.title || t.id}</b> · <code>${t.id}</code>${t.reachable ? '' : (fa ? ' ⚠️ ربات عضو نیست' : ' ⚠️ bot not a member')}`).join('\n') : (fa ? '<i>هیچ مقصدی تنظیم نشده</i>' : '<i>none set</i>')) +
+    `\n\n${fa ? 'افزودن:' : 'Add:'}\n` +
+    (fa ? '• یک پیام از گروه یا کانال را به ربات <b>فوروارد</b> کن و دکمهٔ «جوین اجباری» را بزن.\n• یا بنویس <code>/join @username</code> یا <code>/join -100…</code>' : '• <b>Forward</b> a message from it and tap “Forced join”.\n• Or send <code>/join @username</code>') +
+    `\n\n${fa ? 'ربات باید در گروه عضو باشد (مدیر بودن لازم نیست).' : 'The bot must be a member of the group.'}`;
+  const rows = [];
+  list.forEach((t, i) => rows.push([{ text: `${fa ? '🗑 حذف' : '🗑 Remove'} ${t.title || t.id}`, callback_data: `joinrm:${lang}:${i}`, style: 'danger' }]));
+  rows.push([{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }]);
+  return plain(env, chatId, text, { inline_keyboard: rows }, messageId);
+}
+
 async function destPanel(env, chatId, lang, origin, messageId) {
   const fa = lang === 'fa';
   const uid = chatId;
@@ -335,7 +385,9 @@ async function home(env, chatId, lang, origin, messageId) {
   const en = '<b>✨ TeleRich · Rich Message Studio</b>\n\nSend HTML or Markdown to render a rich message with Bot API 10.3.\n\nExplore individual guides, code examples and live demos. Open the studio for button styles, row layout, media and channel publishing.\n\n/start — menu\n/help — guides\n/post — channel studio\n/ref — quota & invites\n/about — credits';
   const fa = '<b>✨ TeleRich · استودیوی پیام ریچ</b>\n\nمتن HTML یا Markdown بفرستید تا با Bot API 10.3 به پیام ریچ تبدیل شود.\n\nراهنمای هر قابلیت، نمونه کد و دموی زنده در دسترس است. برای تنظیم رنگ و ردیف دکمه، مدیا و ارسال به کانال، استودیو را باز کنید.\n\n/start — منو\n/help — راهنما\n/post — پست‌ساز\n/ref — سهمیه و دعوت\n/about — درباره';
   const text = en + '\n\n〰️〰️〰️〰️〰️〰️〰️〰️\n\n' + fa;
-  return plain(env, chatId, text, menu(lang, origin), messageId);
+  const kb = menu(lang, origin);
+  if (await quotaExempt(env, chatId)) kb.inline_keyboard.unshift([{ text: lang === 'fa' ? '⚙️ تنظیمات ربات' : '⚙️ Bot settings', callback_data: `settings:${lang}` }]);
+  return plain(env, chatId, text, kb, messageId);
 }
 function reconstruct(message) {
   const text = message.text || message.caption || '';
@@ -633,7 +685,7 @@ async function statsReport(env, chatId, lang, origin) {
     top = recs.filter(r => (r.refs || 0) > 0).sort((a, b) => (b.refs || 0) - (a.refs || 0)).slice(0, 3);
   }
   let members = null;
-  if (env.JOIN_CHANNEL) { try { members = (await telegram(env, 'getChatMemberCount', { chat_id: env.JOIN_CHANNEL })).count; } catch (e) {} }
+  { const jl = await joinList(env); if (jl.length) { try { members = (await telegram(env, 'getChatMemberCount', { chat_id: jl[0].id })).count; } catch (e) {} } }
   const medal = ['🥇', '🥈', '🥉'];
   const topText = top.length
     ? top.map((r, i) => `${medal[i]} ${escape(r.name || r.id)} — ${r.refs}`).join('\n')
@@ -703,36 +755,68 @@ async function quotaExhausted(env, chatId, lang, origin, used, limit, blocked) {
   return plain(env, chatId, text, kb);
 }
 
-async function isMember(env, userId) {
-  // returns 'yes' | 'no' | 'unknown'
-  if (!env.JOIN_CHANNEL) return 'yes';
+// ── forced join: one or many chats (channel + group) ─────────────────
+// Stored as a list so the owner can require both his channel and his group.
+// Falls back to the JOIN_CHANNEL env value (comma-separated) when no list is saved.
+async function joinList(env) {
   try {
-    const t = env.JOIN_CHECK_TOKEN || env.BOT_TOKEN;
-    const chan = String(env.JOIN_CHANNEL);
-    const res = await fetch(`https://api.telegram.org/bot${t}/getChatMember`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ chat_id: chan, user_id: userId })
-    });
-    const d = await res.json();
-    if (!d.ok) { console.warn('join check unavailable:', d.description); return 'unknown'; }
-    return ['creator', 'administrator', 'member', 'restricted'].includes(d.result && d.result.status) ? 'yes' : 'no';
-  } catch (e) { console.warn('join check failed:', e.message); return 'unknown'; }
+    const saved = await env.RICHKV.get('join:targets', 'json');
+    if (Array.isArray(saved)) return saved;
+  } catch (e) { /* fall through to env */ }
+  const raw = String(env.JOIN_CHANNEL || '').split(/[,;\s]+/).filter(Boolean);
+  return raw.map((t) => ({ id: t, title: t, type: t.startsWith('@') ? 'channel' : 'chat', username: t.startsWith('@') ? t.slice(1) : '', invite: '' }));
+}
+async function saveJoinList(env, list) {
+  await env.RICHKV.put('join:targets', JSON.stringify(list));
+  return list;
+}
+async function targetLink(env, t) {
+  if (t.username) return 'https://t.me/' + String(t.username).replace(/^@/, '');
+  if (t.invite) return t.invite;
+  try {
+    const chat = await telegram(env, 'getChat', { chat_id: t.id });
+    if (chat.invite_link) return chat.invite_link;
+    if (chat.username) return 'https://t.me/' + chat.username;
+  } catch (e) { /* no public link available */ }
+  return '';
+}
+async function isMember(env, userId) {
+  // 'yes' only when the user is in every required chat
+  const targets = await joinList(env);
+  if (!targets.length) return 'yes';
+  let unknown = false;
+  for (const t of targets) {
+    try {
+      const member = await telegram(env, 'getChatMember', { chat_id: t.id, user_id: userId });
+      if (!['creator', 'administrator', 'member', 'restricted'].includes(member.status)) return 'no';
+    } catch (e) {
+      // bot not in that chat, or the chat no longer exists: do not lock users out
+      console.warn('join check unavailable for', t.id, e.message);
+      unknown = true;
+    }
+  }
+  return unknown ? 'unknown' : 'yes';
 }
 
 async function joinGate(env, chatId, user, origin, callback) {
   const status = await isMember(env, user.id);
   if (status !== 'no') return true;
   const fa = (user.language_code || '').startsWith('fa');
-  const chan = String(env.JOIN_CHANNEL || '@Config7x');
-  const link = chan.startsWith('@') ? 'https://t.me/' + chan.slice(1) : 'https://t.me/c/' + chan.replace(/^-100/, '');
+  const targets = await joinList(env);
+  const rows = [];
+  for (const t of targets) {
+    const link = await targetLink(env, t);
+    const isGroup = t.type === 'group' || t.type === 'supergroup';
+    const name = t.title || t.id;
+    if (link) rows.push([{ text: fa ? (isGroup ? `👥 عضویت در ${name}` : `📡 عضویت در ${name}`) : (isGroup ? `👥 Join ${name}` : `📡 Join ${name}`), url: link, style: 'primary' }]);
+  }
+  rows.push([{ text: fa ? '✅ عضو شدم، ادامه' : '✅ I joined, continue', callback_data: 'joincheck:' + (fa ? 'fa' : 'en') + ':0', style: 'success' }]);
   const text = fa
-    ? '\ud83d\udd12 \u0628\u0631\u0627\u06cc \u0627\u0633\u062a\u0641\u0627\u062f\u0647 \u0627\u0632 \u0631\u0628\u0627\u062a\u060c \u0627\u0648\u0644 \u0639\u0636\u0648 \u06a9\u0627\u0646\u0627\u0644 \u0645\u0627 \u0634\u0648\u061b\n\n\ud83d\udce1 @Config7x\n\n\u0628\u0639\u062f \u0627\u0632 \u0639\u0636\u0648\u06cc\u062a\u060c \u062f\u06a9\u0645\u0647\u0654 \u067e\u0627\u06cc\u06cc\u0646 \u0631\u0648 \u0628\u0632\u0646.'
-    : '\ud83d\udd12 To use this bot, join our channel first, then tap the button below.';
-  const kb = { inline_keyboard: [
-    [{ text: fa ? '\ud83d\udce1 \u0639\u0636\u0648\u06cc\u062a \u062f\u0631 \u06a9\u0627\u0646\u0627\u0644' : '\ud83d\udce1 Join the channel', url: link }],
-    [{ text: fa ? '\u2705 \u0639\u0636\u0648 \u0634\u062f\u0645\u060c \u0627\u062f\u0627\u0645\u0647' : '\u2705 I joined, continue', callback_data: 'joincheck:' + (fa ? 'fa' : 'en') + ':0' }]
-  ]};
+    ? `🔒 <b>عضویت اجباری</b>\n\nبرای استفاده از ربات باید در ${targets.length > 1 ? 'همهٔ موارد زیر' : 'مورد زیر'} عضو باشی:\n\n` +
+      targets.map((t) => `• ${t.type === 'group' || t.type === 'supergroup' ? '👥' : '📡'} <b>${t.title || t.id}</b>`).join('\n') +
+      '\n\nبعد از عضویت، دکمهٔ پایین را بزن.'
+    : `🔒 <b>Join required</b>\n\nJoin ${targets.length > 1 ? 'all of these' : 'this chat'} first, then tap below.`;
+  const kb = { inline_keyboard: rows };
   if (callback) {
     try { await telegram(env, 'answerCallbackQuery', { callback_query_id: callback.id, text: fa ? '\ud83d\udd12 \u0627\u0648\u0644 \u0639\u0636\u0648 \u06a9\u0627\u0646\u0627\u0644 \u0634\u0648' : '\ud83d\udd12 Join the channel first', show_alert: true }); } catch (e) {}
   }
@@ -802,6 +886,27 @@ async function onUpdate(update, env, origin) {
     if (action === 'demo') return sendDemo(env, chatId, lang, Number(arg) || 0, origin, message.message_id);
     if (action === 'updates') return sendUpdates(env, chatId, lang, origin, message.message_id);
     if (action === 'dest') return destPanel(env, chatId, lang, origin, message.message_id);
+    if (action === 'joinadd') {
+      try {
+        const chat = await telegram(env, 'getChat', { chat_id: Number(arg) });
+        const list = await joinList(env);
+        if (!list.some((t) => String(t.id) === String(chat.id))) {
+          list.push({ id: chat.id, title: chat.title || chat.username || String(chat.id), type: chat.type, username: chat.username || '', invite: chat.invite_link || '' });
+          await saveJoinList(env, list);
+        }
+        return joinPanel(env, chatId, lang, origin, message.message_id);
+      } catch (e) { return plain(env, chatId, `⛔ ${e.message}`, undefined, message.message_id); }
+    }
+    if (action === 'joinrm') {
+      const list = await joinList(env);
+      const idx = Number(arg);
+      if (Number.isInteger(idx) && idx >= 0 && idx < list.length) { list.splice(idx, 1); await saveJoinList(env, list); }
+      return joinPanel(env, chatId, lang, origin, message.message_id);
+    }
+    if (action === 'users') return adminList(env, chatId, lang, origin);
+    if (action === 'settings') return settingsPanel(env, chatId, lang, origin, message.message_id);
+    if (action === 'aiset') return aiPanel(env, chatId, lang, origin, message.message_id);
+    if (action === 'join') return joinPanel(env, chatId, lang, origin, message.message_id);
     if (action === 'destuse') {
       try {
         const f = await telegram(env, 'getChat', { chat_id: Number(arg) });
@@ -846,10 +951,11 @@ async function onUpdate(update, env, origin) {
     return plain(env, chatId,
       fa ? `🎯 این پیام از <b>${f.title || f.username || f.id}</b> فوروارد شده.\n\nمی‌خواهی این گروه/کانال مقصد ارسال شود؟`
          : `🎯 Forwarded from <b>${f.title || f.username || f.id}</b>.\n\nMake it your delivery destination?`,
-      { inline_keyboard: [[
-        { text: fa ? '🎯 بله، مقصد شود' : '🎯 Yes, use it', callback_data: `destuse:${detectedLang}:${f.id}`, style: 'success' },
-        { text: fa ? '🏠 انصراف' : '🏠 Cancel', callback_data: `home:${detectedLang}` }
-      ]] }, origin);
+      { inline_keyboard: [
+        [{ text: fa ? '🎯 مقصد ارسال' : '🎯 Delivery destination', callback_data: `destuse:${detectedLang}:${f.id}` },
+         { text: fa ? '🔒 جوین اجباری' : '🔒 Forced join', callback_data: `joinadd:${detectedLang}:${f.id}` }],
+        [{ text: fa ? '🏠 انصراف' : '🏠 Cancel', callback_data: `home:${detectedLang}` }]
+      ] }, origin);
   }
   const text = message.text || '';
   const command = text.split(' ')[0];
@@ -920,6 +1026,22 @@ async function onUpdate(update, env, origin) {
     } catch (e) {
       return plain(env, chatId, `⛔ ${e.message}`, origin);
     }
+  }
+  if (command === '/join') {
+    const arg = (message.text || '').trim().slice(5).trim();
+    const fa = detectedLang === 'fa';
+    if (!arg) return joinPanel(env, chatId, detectedLang, origin);
+    if (arg === 'off' || arg === 'reset') { await saveJoinList(env, []); return joinPanel(env, chatId, detectedLang, origin); }
+    if (!/^(@[A-Za-z][\w]{3,}|-100\d+)$/.test(arg)) return plain(env, chatId, fa ? 'قالب درست نیست. مثال: <code>/join @mygroup</code>' : 'Wrong format.', origin);
+    try {
+      const chat = await telegram(env, 'getChat', { chat_id: arg });
+      const list = await joinList(env);
+      if (!list.some((t) => String(t.id) === String(chat.id))) {
+        list.push({ id: chat.id, title: chat.title || chat.username || String(chat.id), type: chat.type, username: chat.username || '', invite: chat.invite_link || '' });
+        await saveJoinList(env, list);
+      }
+      return joinPanel(env, chatId, detectedLang, origin);
+    } catch (e) { return plain(env, chatId, `⛔ ${e.message}`, origin); }
   }
   if (command === '/about') return plain(env, chatId, '<b>Tele Rich 7x</b>\n\n<a href="https://t.me/Rich7xbot">@Rich7xbot</a>\n<a href="https://t.me/Config7x">@Config7x</a>', back(detectedLang, origin));
   if (command === '/whoami') return sendWhoami(env, chatId, detectedLang, origin, user);

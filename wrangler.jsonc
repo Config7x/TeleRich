@@ -23,6 +23,9 @@
     "REF_BONUS": "10",
     "QUOTA_EXEMPT": "7886358210",
     "PUBLIC_URL": "",
-    "PREMIUM_EMOJI": "1"
+    "PREMIUM_EMOJI": "1",
+    // Forced join: comma-separated @username or -100… IDs at start; the owner
+    // can extend or replace this list from chat with /join (stored in KV).
+    "JOIN_CHANNEL": "@Config7x"
   }
 }
