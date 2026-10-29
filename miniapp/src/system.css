@@ -98,3 +98,10 @@
 .app .ai-msg{margin:10px 0 0;font-size:12.5px;line-height:1.6;padding:10px 12px;border-radius:12px;border:1px solid var(--border-soft);background:var(--surface)}
 .app .ai-msg.ok{color:var(--mint);border-color:#26443a}
 .app .ai-msg.err{color:#ff9a8a;border-color:#5a2b26;background:rgba(255,120,100,.07)}
+
+/* 10 · destination setting */
+.app .dest-setting{padding:4px 0 14px;margin-bottom:6px;border-bottom:1px solid var(--border-soft)}
+.app .dest-heading{display:flex;gap:11px;align-items:flex-start;margin-bottom:12px}
+.app .dest-heading strong{display:block;font-size:14px;font-weight:650}
+.app .dest-heading p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.app .dest-heading svg{color:var(--mint);margin-top:2px}

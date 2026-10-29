@@ -77,6 +77,15 @@ async function authenticate(request, env) {
   if (!allowed(env, user.id)) throw fail('This bot is restricted to its configured administrators.', 403);
   return { operator: false, user };
 }
+const destKey = (uid) => 'dest:' + uid;
+async function readDest(env, uid) { try { return (await env.RICHKV.get(destKey(uid), 'json')) || null; } catch (e) { return null; } }
+async function writeDest(env, uid, rec) {
+  if (rec) await env.RICHKV.put(destKey(uid), JSON.stringify(rec));
+  else await env.RICHKV.delete(destKey(uid));
+  return rec;
+}
+const destLabel = (d) => (d ? `${d.title || d.id} · ${d.type === 'private' ? 'DM' : d.type}` : '—');
+
 async function authorizeChat(env, identity, chatId) {
   if (!chatId) throw fail('A chat ID is required. Send /start to your bot first.');
   const chat = await telegram(env, 'getChat', { chat_id: chatId });
@@ -179,10 +188,23 @@ async function webApi(request, env, url) {
     ] });
     return { webhook, commands };
   }
-  if (!['send', 'edit', 'delete', 'channel', 'draft', 'editEphemeralMessageText', 'editEphemeralMessageCaption', 'editEphemeralMessageReplyMarkup', 'deleteEphemeralMessage'].includes(action)) throw fail('Unknown API route.', 404);
+  if (!['send', 'edit', 'delete', 'channel', 'dest', 'draft', 'editEphemeralMessageText', 'editEphemeralMessageCaption', 'editEphemeralMessageReplyMarkup', 'deleteEphemeralMessage'].includes(action)) throw fail('Unknown API route.', 404);
   const chatId = data.chat_id || identity.user?.id;
   const chat = await authorizeChat(env, identity, chatId);
   if (action === 'channel') return { id: chat.id, title: chat.title, type: chat.type };
+  if (action === 'dest') {
+    const uid = identity.user?.id;
+    if (!uid) throw fail('Open the studio from the bot to manage the destination.', 403);
+    const op = data.op || 'get';
+    if (op === 'clear') return { dest: await writeDest(env, uid, null) };
+    if (op === 'set') {
+      const target = await authorizeChat(env, identity, data.chat_id);
+      const rec = { id: target.id, title: target.title || target.username || String(target.id), type: target.type, username: target.username || '' };
+      await writeDest(env, uid, rec);
+      return { dest: rec };
+    }
+    return { dest: await readDest(env, uid) };
+  }
   if (action === 'send') {
     const uid = identity.user?.id;
     const chargeable = chat.type !== 'private'; // renders to your own bot chat are free
@@ -225,6 +247,7 @@ function menu(lang, origin) {
     [{ text: fa ? '🎨 قالب‌های آماده' : '🎨 Templates', callback_data: `templates:${lang}` }, { text: fa ? '🧩 بلوک‌ها' : '🧩 Blocks', callback_data: `list:${lang}:Blocks:0` }],
     [{ text: fa ? '📖 متن ریچ' : '📖 Rich text', callback_data: `list:${lang}:Rich text:0` }, { text: fa ? '🖼 مدیا' : '🖼 Media', callback_data: `list:${lang}:Media:0` }],
     [{ text: fa ? '🚀 دمو' : '🚀 Demo', callback_data: `demo:${lang}:0`, style: 'success' }, { text: fa ? '🎁 سهمیه' : '🎁 Quota', callback_data: `quota:${lang}` }],
+    [{ text: fa ? '🎯 مقصد ارسال' : '🎯 Destination', callback_data: `dest:${lang}` }, { text: fa ? '🎁 سهمیه' : '🎁 Quota', callback_data: `quota:${lang}` }],
     [{ text: fa ? '🌐 English' : '🌐 فارسی', callback_data: `home:${fa ? 'en' : 'fa'}` }, { text: fa ? 'ℹ️ درباره' : 'ℹ️ About', callback_data: `about:${lang}` }]
   ] };
 }
@@ -272,6 +295,24 @@ async function templatesPanel(env, chatId, lang, origin, messageId) {
   }
   rows.push([{ text: fa ? '✨ باز کردن استودیو' : '✨ Open studio', web_app: { url: origin }, style: 'primary' }]);
   rows.push([{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }]);
+  return plain(env, chatId, text, { inline_keyboard: rows }, messageId);
+}
+
+
+async function destPanel(env, chatId, lang, origin, messageId) {
+  const fa = lang === 'fa';
+  const uid = chatId;
+  const d = await readDest(env, uid);
+  const text = `<b>${fa ? '🎯 مقصد ارسال' : '🎯 Delivery destination'}</b>\n\n` +
+    (fa ? 'پستی که می‌سازی به این مقصد می‌رود. می‌تواند کانال باشد یا گروه.' : 'Posts you build go here. It can be a channel or a group.') +
+    `\n\n${fa ? 'مقصد فعلی' : 'Current'}: <b>${d ? destLabel(d) : (fa ? 'انتخاب نشده — هر بار می‌پرسد' : 'not set — asked every time')}</b>` +
+    (d ? `\n<code>${d.id}</code>` : '') +
+    `\n\n${fa ? 'چطور تنظیم کنم؟' : 'How to set it?'}\n` +
+    (fa ? '• یک پیام از گروه یا کانال به همین ربات <b>فوروارد</b> کن — خودش تشخیص می‌دهد.\n• یا بنویس <code>/dest @username</code> یا <code>/dest -100…</code>' : '• <b>Forward</b> any message from the group or channel here and I pick it up.\n• Or send <code>/dest @username</code> / <code>/dest -100…</code>') +
+    `\n\n${fa ? 'ربات باید در گروه عضو و مدیر باشد (مجوز ارسال پیام).' : 'The bot must be an admin in that chat with Post messages permission.'}`;
+  const rows = [];
+  if (d) rows.push([{ text: fa ? '🗑 پاک کردن مقصد' : '🗑 Clear destination', callback_data: `destclear:${lang}`, style: 'danger' }]);
+  rows.push([{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }, { text: fa ? '✨ استودیو' : '✨ Studio', web_app: { url: origin }, style: 'primary' }]);
   return plain(env, chatId, text, { inline_keyboard: rows }, messageId);
 }
 
@@ -760,6 +801,35 @@ async function onUpdate(update, env, origin) {
     }
     if (action === 'demo') return sendDemo(env, chatId, lang, Number(arg) || 0, origin, message.message_id);
     if (action === 'updates') return sendUpdates(env, chatId, lang, origin, message.message_id);
+    if (action === 'dest') return destPanel(env, chatId, lang, origin, message.message_id);
+    if (action === 'destuse') {
+      try {
+        const f = await telegram(env, 'getChat', { chat_id: Number(arg) });
+        const rec = { id: f.id, title: f.title || f.username || String(f.id), type: f.type, username: f.username || '' };
+        await writeDest(env, chatId, rec);
+        const ok = lang === 'fa' ? `✅ مقصد روی <b>${rec.title}</b> تنظیم شد.` : `✅ Destination set to <b>${rec.title}</b>.`;
+        return plain(env, chatId, ok, { inline_keyboard: [[{ text: lang === 'fa' ? '🎯 مقصد ارسال' : '🎯 Destination', callback_data: `dest:${lang}` }, { text: lang === 'fa' ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }]] }, message.message_id);
+      } catch (e) {
+        return plain(env, chatId, `⛔ ${e.message}`, undefined, message.message_id);
+      }
+    }
+    if (action === 'destclear') {
+      await writeDest(env, chatId, null);
+      return destPanel(env, chatId, lang, origin, message.message_id);
+    }
+    if (action === 'publish' && await readDest(env, chatId)) {
+      const d = await readDest(env, chatId);
+      const q = await quotaStatus(env, chatId);
+      if (!q.ok) return quotaExhausted(env, chatId, lang, origin, q.used, q.limit, q.blocked);
+      await telegram(env, 'copyMessage', { chat_id: d.id, from_chat_id: chatId, message_id: message.message_id });
+      await addUsed(env, chatId);
+      await bumpStats(env, { sends: 1, channel: 1 });
+      const fa = lang === 'fa';
+      return plain(env, chatId, fa ? `✅ پست در <b>${d.title}</b> منتشر شد.` : `✅ Published to <b>${d.title}</b>.`, { inline_keyboard: [
+        [{ text: fa ? '🎯 تغییر مقصد' : '🎯 Change destination', callback_data: `dest:${lang}` }],
+        [{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }, { text: fa ? '✨ استودیو' : '✨ Studio', web_app: { url: origin }, style: 'primary' }]
+      ] });
+    }
     if (action === 'publish' || action === 'edit') {
       const label = action === 'publish' ? (lang === 'fa' ? 'آدرس @کانال یا شناسه -100… را در پاسخ بفرستید. شما و ربات باید مدیر باشید.' : 'Reply with the destination @channel or -100… ID. You and the bot must be administrators.') : (lang === 'fa' ? 'متن جدید HTML یا Markdown را در پاسخ بفرستید.' : 'Reply with your replacement HTML or Markdown.');
       return plain(env, chatId, `${label}\n\n<code>TR:${action}:${arg}:${lang}</code>`, { force_reply: true, selective: true });
@@ -769,6 +839,17 @@ async function onUpdate(update, env, origin) {
       return home(env, chatId, lang, origin);
     }
     return;
+  }
+  if (message.forward_from_chat && message.forward_from_chat.type !== 'private' && !(message.text || '').startsWith('/')) {
+    const f = message.forward_from_chat;
+    const fa = detectedLang === 'fa';
+    return plain(env, chatId,
+      fa ? `🎯 این پیام از <b>${f.title || f.username || f.id}</b> فوروارد شده.\n\nمی‌خواهی این گروه/کانال مقصد ارسال شود؟`
+         : `🎯 Forwarded from <b>${f.title || f.username || f.id}</b>.\n\nMake it your delivery destination?`,
+      { inline_keyboard: [[
+        { text: fa ? '🎯 بله، مقصد شود' : '🎯 Yes, use it', callback_data: `destuse:${detectedLang}:${f.id}`, style: 'success' },
+        { text: fa ? '🏠 انصراف' : '🏠 Cancel', callback_data: `home:${detectedLang}` }
+      ]] }, origin);
   }
   const text = message.text || '';
   const command = text.split(' ')[0];
@@ -824,6 +905,21 @@ async function onUpdate(update, env, origin) {
     await plain(env, chatId, '⏳ در حال تماس با مدل…', origin);
     try { const r = await aiTest(env, uid); return plain(env, chatId, `✅ پاسخ مدل: <code>${r.reply}</code>`, origin); }
     catch (e) { return plain(env, chatId, `⛔ ${e.message}`, origin); }
+  }
+  if (command === '/dest') {
+    const arg = (message.text || '').trim().slice(5).trim();
+    const fa = detectedLang === 'fa';
+    if (!arg) return destPanel(env, chatId, detectedLang, origin);
+    if (arg === 'off' || arg === 'clear') { await writeDest(env, chatId, null); return destPanel(env, chatId, detectedLang, origin); }
+    if (!/^(@[A-Za-z][\w]{3,}|-100\d+)$/.test(arg)) return plain(env, chatId, fa ? 'قالب درست نیست. مثال: <code>/dest @mygroup</code> یا <code>/dest -1001234567890</code>' : 'Wrong format. Example: <code>/dest @mygroup</code>', origin);
+    try {
+      const chat = await authorizeChat(env, { operator: false, user }, arg);
+      const rec = { id: chat.id, title: chat.title || chat.username || String(chat.id), type: chat.type, username: chat.username || '' };
+      await writeDest(env, chatId, rec);
+      return plain(env, chatId, fa ? `✅ مقصد روی <b>${rec.title}</b> تنظیم شد.\nاز این به بعد پست‌ها همین‌جا منتشر می‌شوند.` : `✅ Destination set to <b>${rec.title}</b>.`, { inline_keyboard: [[{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${detectedLang}` }]] }, origin);
+    } catch (e) {
+      return plain(env, chatId, `⛔ ${e.message}`, origin);
+    }
   }
   if (command === '/about') return plain(env, chatId, '<b>Tele Rich 7x</b>\n\n<a href="https://t.me/Rich7xbot">@Rich7xbot</a>\n<a href="https://t.me/Config7x">@Config7x</a>', back(detectedLang, origin));
   if (command === '/whoami') return sendWhoami(env, chatId, detectedLang, origin, user);
