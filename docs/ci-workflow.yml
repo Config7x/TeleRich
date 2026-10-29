@@ -1,3 +1,7 @@
+# GitHub Actions: build + tests on every push.
+# The OAuth token used for automated pushes has no `workflow` scope, so this file
+# lives here on purpose. Copy it to .github/workflows/ci.yml in the GitHub web
+# editor (or push it with a token that has the workflow scope) to switch CI on.
 name: CI
 
 on:
