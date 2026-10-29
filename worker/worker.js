@@ -25,7 +25,7 @@ const safeText = v => String(v ?? '')
   .replace(/(?<![\ud800-\udbff])[\udc00-\udfff]/g, '\u2573')
   .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
 
-import { premiumOff, premiumMarkup, premiumText, stripPremium } from './premium.js';
+import { premiumOff, premiumMap, premiumMarkup, premiumText, stripPremium, markPremiumDead, resetPremiumCache } from './premium.js';
 import { premiumize as emojiPremiumize, mergeMaps as emojiMergeMaps, SEED_PACKS } from './emoji_engine.js';
 import { PROVIDERS, aiConfig, aiSave, aiGenerate, aiTest, emojiPacks, emojiAddPack, emojiRemovePack } from './ai.js';
 
@@ -33,16 +33,19 @@ async function telegram(env, method, data = {}) {
   if (!env.BOT_TOKEN) throw fail('BOT_TOKEN is not configured on the Worker.', 503);
   const send = payload => fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/${method}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
   let outbound = data;
-  if (!premiumOff(env)) {
-    if (outbound.reply_markup) outbound.reply_markup = premiumMarkup(outbound.reply_markup);
-    if (outbound.text) outbound.text = premiumText(outbound.text);
-    if (outbound.rich_message?.html) outbound.rich_message = { ...outbound.rich_message, html: premiumText(outbound.rich_message.html) };
+  const emojiMap = premiumOff(env) ? null : await premiumMap(env);
+  if (emojiMap) {
+    if (outbound.reply_markup) outbound.reply_markup = premiumMarkup(outbound.reply_markup, emojiMap);
+    if (outbound.text) outbound.text = premiumText(outbound.text, emojiMap);
+    if (outbound.caption) outbound.caption = premiumText(outbound.caption, emojiMap);
+    if (outbound.rich_message?.html) outbound.rich_message = { ...outbound.rich_message, html: premiumText(outbound.rich_message.html, emojiMap) };
   }
   let response = await send(outbound);
   let body = await response.json();
   // Premium emoji are rejected on accounts without Premium: fall back to plain once.
   if (!body.ok && /emoji|CUSTOM_EMOJI|BUTTON_/i.test(body.description || '') && !premiumOff(env)) {
     console.error('PREMIUM-FALLBACK', method, body.description);
+    markPremiumDead();
     outbound = stripPremium(outbound);
     response = await send(outbound);
     body = await response.json();
@@ -1042,6 +1045,35 @@ async function onUpdate(update, env, origin) {
       }
       return joinPanel(env, chatId, detectedLang, origin);
     } catch (e) { return plain(env, chatId, `⛔ ${e.message}`, origin); }
+  }
+  if (command === '/emoji' || command === '/emojipack') {
+    if (!(await quotaExempt(env, chatId))) return plain(env, chatId, detectedLang === 'fa' ? '🔒 این دستور برای مدیر است.' : '🔒 Owner only.', back(detectedLang, origin));
+    const arg = text.replace(/^\/emoji(pack)?(@\S+)?\s*/i, '').trim();
+    const fa = detectedLang === 'fa';
+    if (!arg) {
+      const { packs, total } = await emojiPacks(env, chatId);
+      const lines = packs.length
+        ? packs.map((p, i) => `${i + 1}. <b>${escape(p.title || p.name)}</b> · ${p.emojis.length}`).join('\n')
+        : (fa ? 'هنوز پکی اضافه نشده.' : 'No packs yet.');
+      return plain(env, chatId, (fa
+        ? `✨ <b>پک‌های ایموجی پرمیوم</b>\n\n${lines}\n\n📦 ${total} ایموجی در ${packs.length} پک\n\nبرای افزودن، لینک پک را بفرست:\n<code>/emoji https://t.me/addemoji/PackName</code>`
+        : `✨ <b>Premium emoji packs</b>\n\n${lines}\n\n📦 ${total} emoji in ${packs.length} packs\n\nTo add one, send its link:\n<code>/emoji https://t.me/addemoji/PackName</code>`),
+        back(detectedLang, origin));
+    }
+    try {
+      const added = await emojiAddPack(env, chatId, { pack: arg }, telegram);
+      resetPremiumCache();
+      const { total } = await emojiPacks(env, chatId);
+      return plain(env, chatId, fa
+        ? `✅ پک اضافه شد: <b>${escape(String(arg).replace(/^https?:\/\/t\.me\/addemoji\//, ''))}</b>\n\n📦 حالا ${total} ایموجی داری. از این به بعد روی متن و روی همهٔ دکمه‌ها اعمال می‌شود.`
+        : `✅ Pack added: <b>${escape(String(arg).replace(/^https?:\/\/t\.me\/addemoji\//, ''))}</b>\n\n📦 ${total} emoji now. They apply to text and to every button.`,
+        back(detectedLang, origin));
+    } catch (error) {
+      return plain(env, chatId, fa
+        ? `⚠️ نشد اضافه کنم: ${escape(error.message)}\n\nلینک درست شکل <code>https://t.me/addemoji/Name</code> است و ربات باید به آن پک دسترسی داشته باشد.`
+        : `⚠️ Could not add it: ${escape(error.message)}\n\nA valid link looks like <code>https://t.me/addemoji/Name</code>, and the bot must be able to see that pack.`,
+        back(detectedLang, origin));
+    }
   }
   if (command === '/about') return plain(env, chatId, '<b>Tele Rich 7x</b>\n\n<a href="https://t.me/Rich7xbot">@Rich7xbot</a>\n<a href="https://t.me/Config7x">@Config7x</a>', back(detectedLang, origin));
   if (command === '/whoami') return sendWhoami(env, chatId, detectedLang, origin, user);

@@ -82,7 +82,7 @@ function stripFences(text) {
 }
 
 /* ── premium emoji packs ─────────────────────────────────────────────── */
-const MAX_PACKS = 12;
+const MAX_PACKS = 30;
 
 export async function emojiPacks(env, uid) {
   const packs = (await env.RICHKV.get('emo:' + uid, 'json')) || [];
