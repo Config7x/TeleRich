@@ -15,7 +15,7 @@
 <img src="https://img.shields.io/badge/Cloudflare-Workers-F38020?style=flat-square&logo=cloudflare&logoColor=white" alt="Workers" />
 <img src="https://img.shields.io/badge/Telegram%20Bot%20API-10.3-26A5E4?style=flat-square&logo=telegram&logoColor=white" alt="Bot API" />
 <img src="https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=black" alt="React" />
-<img src="https://img.shields.io/badge/tests-13%20passing-2DD4BF?style=flat-square" alt="Tests" />
+<img src="https://img.shields.io/badge/tests-36%20passing-2DD4BF?style=flat-square" alt="Tests" />
 <img src="https://img.shields.io/badge/license-MIT-10B981?style=flat-square" alt="License" />
 <img src="https://img.shields.io/badge/PRs-welcome-8B5CF6?style=flat-square" alt="PRs" />
 
@@ -179,6 +179,14 @@ TeleRich/
 | `/whoami` | شناسهٔ عددی شما |
 | `/stats` | گزارش ربات (مالک) |
 | `/admin` | مدیریت کاربران و سهمیه (مالک) |
+| `/dest` | مقصد ارسال (کانال یا گروه) — `/dest @name`، `/dest -100…`، `/dest off` (مالک) |
+| `/join` | عضویت اجباری روی چند کانال/گروه — `/join @name`، `/join off` (مالک) |
+| `/key` | ثبت کلید هوش مصنوعی بدون مینی‌اپ — `/key gemini AIza…` (مالک) |
+| `/model` | تغییر مدل — `/model gemini-2.5-flash` (مالک) |
+| `/ai` | وضعیت سرویس، مدل و کلید (مالک) |
+| `/aitest` | آزمایش کلید با یک پیام کوتاه (مالک) |
+
+> دکمهٔ **⚙️ تنظیمات ربات** در منوی مالک، همان تنظیمات را به‌صورت پنل باز می‌کند: مقصد ارسال، عضویت اجباری، هوش مصنوعی و مدیریت کاربران.
 
 ### 🔌 API استودیو
 
@@ -340,7 +348,7 @@ TeleRich/
 
 ### 🛠 Bot commands
 
-`/start` main menu · `/webapp` open the studio · `/post` channel studio · `/guide` rich text guide · `/html` blocks & layout · `/media` media guide · `/buttons` rich buttons · `/table` table sample · `/demo` full demo · `/updates` Bot API 10.3 changes · `/ref` quota & invite link · `/whoami` your numeric ID · `/stats` bot report (owner) · `/admin` users & quotas (owner)
+`/start` main menu · `/webapp` open the studio · `/post` channel studio · `/guide` rich text guide · `/html` blocks & layout · `/media` media guide · `/buttons` rich buttons · `/table` table sample · `/demo` full demo · `/updates` Bot API 10.3 changes · `/ref` quota & invite link · `/whoami` your numeric ID · `/stats` bot report (owner) · `/admin` users & quotas (owner) · `/dest` delivery destination, channel or group (`/dest @name`, `/dest off`) · `/join` forced join on several chats (`/join @name`, `/join off`) · `/key` save an AI key from chat · `/model` switch model · `/ai` AI status · `/aitest` test the key. The owner menu also carries a **⚙️ Bot settings** panel for destination, forced join, AI and users.
 
 ### 🔌 Studio API
 

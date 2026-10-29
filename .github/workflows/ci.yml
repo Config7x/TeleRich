@@ -1,0 +1,23 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Build mini app and worker bundle
+        run: npm run build
+      - name: Tests
+        run: npm test
+      - name: Check the worker bundle is syntactically valid
+        run: node --check worker/index.js
