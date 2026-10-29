@@ -42,20 +42,45 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
 button{transition:background .16s ease,border-color .16s ease,transform .16s ease,color .16s ease}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 
-@media (max-width:860px){
-  .sidebar{inset:auto 0 0 0;width:100%;height:64px;flex-direction:row;align-items:center;padding:0 8px;
-    border-right:0;border-top:1px solid var(--border);z-index:40}
-  .brand,.workspace-selector,.nav-label,.sidebar-bottom,.resources-label{display:none!important}
-  .sidebar nav{display:flex;flex-direction:row;gap:4px;width:100%;justify-content:space-around;overflow-x:auto}
-  .nav-item{height:52px;flex:1 0 auto;flex-direction:column;gap:3px;justify-content:center;font-size:10px;margin:0;padding:4px 6px}
-  .nav-item.active:before{display:none}
-  .nav-item>span:nth-child(2){flex:0}
-  .main-shell{margin-left:0;padding-bottom:72px}
-  .topbar{padding:0 14px;height:58px}
-  main{padding:18px 14px 10px}
-  .cmp-grid,.studio-grid{grid-template-columns:1fr!important}
-  .cmp-preview{position:static!important}
-}
-
 .app.light .panel{box-shadow:0 8px 24px #0b1a1410}
 .app.light .nav-item.active{background:#e7f6ef}
+
+
+/* ═══ Mobile shell v2 — bottom tab bar + side drawer (RTL-aware) ═══ */
+.tabbar,.drawer-handle{display:none}
+@media (max-width:860px){
+  .main-shell{margin-left:0!important;padding-bottom:calc(74px + env(safe-area-inset-bottom))}
+  main{padding:18px 14px 12px}
+  .topbar{height:56px;padding:0 12px;position:sticky;top:0;z-index:20;background:color-mix(in srgb,var(--bg) 88%,transparent);backdrop-filter:blur(14px)}
+  .topbar .search-trigger,.topbar .top-divider,.topbar .theme-switch{display:none}
+  .mobile-menu{display:inline-flex;margin-inline-end:6px;width:36px;height:36px;border-radius:10px;background:var(--surface);border:1px solid var(--border);color:var(--text)}
+  .cmp-grid,.studio-grid{grid-template-columns:1fr!important}
+  .cmp-preview{position:static!important}
+
+  /* drawer */
+  .sidebar{position:fixed;inset:0 auto 0 0;width:min(84vw,300px);height:100dvh;padding:calc(22px + env(safe-area-inset-top)) 16px calc(16px + env(safe-area-inset-bottom));
+    transform:translateX(-104%);transition:transform .28s cubic-bezier(.22,.8,.3,1);z-index:60;overflow-y:auto;overscroll-behavior:contain;
+    border-right:1px solid var(--border);box-shadow:none;flex-direction:column}
+  .persian .sidebar{inset:0 0 0 auto;transform:translateX(104%);border-right:0;border-left:1px solid var(--border)}
+  .sidebar.mobile-open{transform:translateX(0)!important;box-shadow:0 0 60px #000a}
+  .nav-backdrop{position:fixed;inset:0;background:#0008;backdrop-filter:blur(4px);z-index:55;animation:fadeIn .2s ease}
+  .sidebar .brand{display:flex}.sidebar .workspace-selector{display:flex}.sidebar .nav-label{display:block}
+  .sidebar .sidebar-bottom{display:block;padding-top:18px}
+  .sidebar .nav-item{height:46px;flex-direction:row}
+  .sidebar .nav-item.active:before{display:block;left:auto;inset-inline-start:-16px}
+  .drawer-handle{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+
+  /* bottom tab bar */
+  .tabbar{display:grid;grid-template-columns:repeat(5,1fr);position:fixed;inset:auto 0 0 0;z-index:40;
+    padding:6px 6px calc(6px + env(safe-area-inset-bottom));background:color-mix(in srgb,var(--sidebar) 92%,transparent);
+    backdrop-filter:blur(18px);border-top:1px solid var(--border)}
+  .tabbar button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;height:54px;border-radius:12px;
+    color:var(--muted);font-size:10px;font-weight:500;position:relative;transition:color .15s,background .15s}
+  .tabbar button svg{width:21px;height:21px}
+  .tabbar button.active{color:var(--mint);background:var(--mint-dark)}
+  .tabbar button.active:after{content:'';position:absolute;top:3px;width:18px;height:3px;border-radius:3px;background:var(--mint)}
+  .tabbar .tab-badge{position:absolute;top:5px;inset-inline-end:calc(50% - 20px);min-width:16px;height:16px;border-radius:8px;
+    background:var(--mint);color:#0b241b;font-size:9px;font-weight:700;display:grid;place-items:center;padding:0 4px}
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@media (min-width:861px){.nav-backdrop{display:none}}
