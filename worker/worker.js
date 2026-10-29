@@ -211,6 +211,10 @@ const TEMPLATES = [
   { id: 'guide', fa: 'آموزش گام‌به‌گام', en: 'Step-by-step guide', icon: '🧭', desc: 'مراحل شماره‌دار و بخش بازشو' },
   { id: 'offer', fa: 'پیشنهاد فروش', en: 'Sales offer', icon: '🛍', desc: 'قیمت، مزیت‌ها و دکمه خرید' },
   { id: 'account', fa: 'معرفی پروفایل', en: 'Account profile', icon: '👤', desc: 'کارت پروفایل با کپی یوزر و پسورد' },
+  { id: 'welcome', fa: 'خوش‌آمد کانال', en: 'Channel welcome', icon: '👋', desc: 'تیتر، مزیت‌ها و دکمهٔ شروع' },
+  { id: 'report', fa: 'گزارش با جدول', en: 'Report with table', icon: '📈', desc: 'کارت آمار، جدول و نمودار' },
+  { id: 'buttonset', fa: 'همهٔ دکمه‌ها', en: 'Every button', icon: '🔘', desc: 'سه نوع اکشن با سه رنگ' },
+  { id: 'mediapost', fa: 'پست مدیا', en: 'Media post', icon: '🖼', desc: 'اسلایدشو، کپشن و دکمه' },
   { id: 'scratch', fa: 'از صفر', en: 'From scratch', icon: '📝', desc: 'بوم خالی برای شروع آزاد' },
 ];
 
@@ -813,7 +817,7 @@ export default {
       if (!env.WEBHOOK_SECRET || !await equal(received, env.WEBHOOK_SECRET)) return new Response('Unauthorized', { status: 401 });
       let update;
       try { update = await request.json(); } catch { return new Response('Invalid update', { status: 400 }); }
-      ctx.waitUntil(onUpdate(update, env, (env.PUBLIC_URL || url.origin) + '?v=20261031menu').catch(async error => {
+      ctx.waitUntil(onUpdate(update, env, (env.PUBLIC_URL || url.origin) + '?v=20261031tpl').catch(async error => {
         // Log no tokens or source content. User-facing API errors help diagnose unsupported markup/media.
         console.error('TeleRich update error:', error.message);
         const chat = update.message?.chat || update.callback_query?.message?.chat;

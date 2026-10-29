@@ -273,7 +273,64 @@ export const templates: Template[] = [
     name: 'نظرسنجی زنده',
     icon: '📊',
     build: () => [newArt('heading'), newArt('poll'), newArt('pollimg'), newArt('share')],
-  },];
+  },
+  {
+    id: 'welcome',
+    name: 'خوش‌آمد کانال',
+    icon: '👋',
+    build: () => [
+      { ...(b('heading') as any), level: 1, text: '👋 به کانال ما خوش آمدی' },
+      { ...(b('text') as any), text: 'اینجا هر هفته یک آموزش کوتاه و کاربردی می‌گیری.' },
+      { ...(b('heading') as any), level: 3, text: 'چه چیزی یاد می‌گیری؟' },
+      { ...(b('list') as any), items: ['✅ آموزش‌های ۵ دقیقه‌ای', '✅ نمونه‌های آماده برای کپی', '✅ پاسخ سریع به سؤال‌ها'] },
+      { ...(b('quote') as any), text: 'یادگیری وقتی ساده است که هر روز کمی باشد.', expandable: false },
+      newArt('buttons'),
+    ],
+  },
+  {
+    id: 'report',
+    name: 'گزارش با جدول',
+    icon: '📈',
+    build: () => [
+      { ...(b('heading') as any), level: 1, text: '📈 گزارش هفتگی' },
+      newArt('stats'),
+      newArt('table'),
+      newArt('chart'),
+      newArt('footnote'),
+    ],
+  },
+  {
+    id: 'buttonset',
+    name: 'همهٔ دکمه‌ها',
+    icon: '🔘',
+    build: () => [
+      { ...(b('heading') as any), level: 2, text: '🔘 انواع دکمهٔ ریچ' },
+      {
+        id: uid(), kind: 'buttons', rows: [
+          [
+            { id: uid(), label: 'لینک', type: 'url', style: 'success', url: 'https://t.me/Config7x' },
+            { id: uid(), label: 'کپی متن', type: 'copy_text', style: 'primary', text: 'COPIED-1234' },
+          ],
+          [
+            { id: uid(), label: 'اشتراک‌گذاری', type: 'url', style: 'danger', url: 'https://t.me/share/url?url=https://t.me/Config7x' },
+          ],
+        ],
+      },
+      { ...(b('text') as any), text: 'سه رنگ، سه مفهوم: سبز برای اقدام، آبی برای اطلاعات، قرمز برای خطر.' },
+    ],
+  },
+  {
+    id: 'mediapost',
+    name: 'پست مدیا',
+    icon: '🖼',
+    build: () => [
+      { ...(b('heading') as any), level: 2, text: '🖼 پست مدیا' },
+      newArt('slideshow'),
+      { ...(b('text') as any), text: 'عکس‌ها را از کتابخانهٔ رسانه اضافه کن؛ کپشن و دکمه‌ها روی همان پیام می‌نشینند.' },
+      newArt('buttons'),
+    ],
+  },
+];
 
 export function newArt(key: string): Block {
   const kind = KIND_MAP[key];
