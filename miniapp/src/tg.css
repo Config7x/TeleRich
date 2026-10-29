@@ -1,0 +1,137 @@
+/* ────────────────────────────────────────────────────────────────────
+   Telegram-native skin (loaded last, wins over the old dashboard theme)
+   The Mini App should look like a screen of Telegram, not a SaaS site:
+   flat surfaces, one accent, dense 56px list rows, native type scale,
+   a real bottom tab bar. No gradients, no glow, no glass, no hero art.
+   ──────────────────────────────────────────────────────────────────── */
+.app.tg{
+  --bg:#17212b;
+  --surface:#1e2836;
+  --surface-2:#232e3c;
+  --divider:rgba(255,255,255,.07);
+  --text:#f4f7fa;
+  --muted:#8a9aa9;
+  --accent:#4f9bf7;
+  --accent-ink:#ffffff;
+  --danger:#ec3942;
+  --ok:#4fae4e;
+  --radius:10px;
+  --row-h:56px;
+  min-height:100dvh;
+  background:var(--bg)!important;
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Vazirmatn","Noto Sans Arabic",system-ui,sans-serif;
+  font-size:15px;
+  line-height:1.45;
+  letter-spacing:0;
+}
+.app.tg.is-light{
+  --bg:#f4f4f5;
+  --surface:#ffffff;
+  --surface-2:#eceef1;
+  --divider:rgba(0,0,0,.08);
+  --text:#11161c;
+  --muted:#707579;
+  --accent:#3390ec;
+}
+
+/* layout: one column, no sidebar, room for the tab bar */
+.app.tg .main-shell{margin:0!important;padding:0!important;width:100%!important;max-width:none!important;border:none!important;background:transparent!important;box-shadow:none!important;display:flex;flex-direction:column;min-height:100dvh}
+.app.tg .sidebar,.app.tg .nav-backdrop,.app.tg .topbar,.app.tg .page-heading,.app.tg .home-hero,.app.tg .home-stats,.app.tg .home-grid,.app.tg .home-label,.app.tg .home-recent,.app.tg .home-empty,.app.tg .release-banner,.app.tg .upgrade-card{display:none!important}
+.app.tg main{width:100%;max-width:none;margin:0;padding:0 0 calc(64px + env(safe-area-inset-bottom));flex:1}
+
+/* header bar */
+.app.tg .tg-bar{
+  position:sticky;top:0;z-index:20;display:flex;align-items:center;justify-content:space-between;
+  gap:12px;height:50px;padding:0 14px;background:var(--surface);
+  border-bottom:1px solid var(--divider);backdrop-filter:saturate(180%) blur(12px);
+}
+.app.tg .tg-bar strong{font-size:16px;font-weight:600;letter-spacing:-.2px}
+.app.tg .tg-bar-actions{display:flex;align-items:center;gap:8px}
+.app.tg .tg-chip{
+  height:30px;padding:0 12px;border-radius:15px;border:1px solid var(--divider);
+  background:var(--surface-2);color:var(--muted);font:inherit;font-size:13px;font-weight:500;cursor:pointer;
+}
+.app.tg .tg-chip.is-on{color:var(--accent);border-color:transparent;background:color-mix(in srgb,var(--accent) 16%,transparent)}
+
+/* page + groups */
+.app.tg .tg-page{padding:12px 12px 8px}
+.app.tg .tg-group-label{
+  margin:18px 6px 7px;font-size:13px;font-weight:500;color:var(--muted);letter-spacing:.2px;
+}
+.app.tg .tg-page .tg-group-label:first-of-type{margin-top:20px}
+
+/* primary action */
+.app.tg .tg-primary{
+  display:flex;align-items:center;justify-content:center;gap:8px;width:100%;height:48px;
+  border:none;border-radius:var(--radius);background:var(--accent);color:var(--accent-ink);
+  font:inherit;font-size:15px;font-weight:600;cursor:pointer;
+}
+.app.tg .tg-primary:active{filter:brightness(.94)}
+
+/* list rows */
+.app.tg .tg-list{
+  background:var(--surface);border-radius:var(--radius);overflow:hidden;
+  border:1px solid var(--divider);
+}
+.app.tg .tg-row{
+  display:flex;align-items:center;gap:12px;width:100%;min-height:var(--row-h);padding:10px 12px;
+  background:transparent;border:0;border-bottom:1px solid var(--divider);
+  color:var(--text);font:inherit;text-align:start;cursor:pointer;
+}
+.app.tg .tg-row:last-child{border-bottom:0}
+.app.tg .tg-row:active{background:var(--surface-2)}
+.app.tg .tg-ico{
+  display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border-radius:9px;
+  background:var(--surface-2);color:var(--muted);
+}
+.app.tg .tg-ico.ai{color:#c79cff}
+.app.tg .tg-ico.emo{color:#f4c76a}
+.app.tg .tg-ico.tpl{color:#8fb7ff}
+.app.tg .tg-ico.code{color:#7fdcc0}
+.app.tg .tg-ico.chan{color:#7fb2ff}
+.app.tg .tg-ico.news{color:#ffb46a}
+.app.tg .tg-row-tx{display:flex;flex-direction:column;gap:1px;min-width:0;flex:1}
+.app.tg .tg-row-tx b{font-size:15px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app.tg .tg-row-tx small{font-size:13px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.app.tg .tg-chev{color:#5d6f80;flex:0 0 auto}
+.app.tg.persian .tg-chev{transform:scaleX(-1)}
+.app.tg .tg-badge{
+  flex:0 0 auto;min-width:20px;height:20px;padding:0 6px;border-radius:10px;
+  background:var(--accent);color:#fff;font-size:12px;font-style:normal;font-weight:600;
+  display:grid;place-items:center;
+}
+
+/* bottom tab bar */
+.app.tg .tg-tabs{
+  position:fixed;inset-inline:0;bottom:0;z-index:30;display:flex;
+  background:var(--surface);border-top:1px solid var(--divider);
+  padding:6px 4px calc(6px + env(safe-area-inset-bottom));
+}
+.app.tg .tg-tabs button{
+  flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;
+  background:none;border:0;padding:4px 0 2px;color:var(--muted);font:inherit;cursor:pointer;
+}
+.app.tg .tg-tabs button span{font-size:11px;font-weight:500}
+.app.tg .tg-tabs button.is-active{color:var(--accent)}
+
+/* the older pages keep working, just flattened into the native canvas */
+.app.tg .content-page,.app.tg .settings-layout,.app.tg .studio-grid,.app.tg .release-page{
+  padding:12px!important;margin:0!important;max-width:none!important;
+}
+.app.tg .panel,.app.tg .card,.app.tg .settings-card,.app.tg .release-card,.app.tg .templates-section{
+  background:var(--surface)!important;border:1px solid var(--divider)!important;
+  border-radius:var(--radius)!important;box-shadow:none!important;backdrop-filter:none!important;
+}
+.app.tg .button,.app.tg .hero-cta,.app.tg .quick-card,.app.tg .stat-card{
+  border-radius:var(--radius)!important;box-shadow:none!important;
+  background-image:none!important;
+}
+.app.tg .button.primary{background:var(--accent)!important;color:var(--accent-ink)!important;border-color:transparent!important}
+.app.tg .button.secondary,.app.tg .button.subtle{background:var(--surface-2)!important;color:var(--text)!important;border-color:var(--divider)!important}
+.app.tg .eyebrow,.app.tg .hero-eyebrow{color:var(--muted)!important;letter-spacing:.4px}
+.app.tg h1,.app.tg h2,.app.tg h3{letter-spacing:-.2px}
+.app.tg .toast{border-radius:var(--radius);box-shadow:0 6px 20px rgba(0,0,0,.35)}
+.app.tg .modal,.app.tg .sheet{border-radius:14px!important}
+/* no decorative orbs anywhere */
+.app.tg .hero-orb,.app.tg .release-spark{display:none!important}
