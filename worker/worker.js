@@ -26,6 +26,7 @@ const safeText = v => String(v ?? '')
   .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
 
 import { premiumOff, premiumMarkup, premiumText, stripPremium } from './premium.js';
+import { premiumize as emojiPremiumize, mergeMaps as emojiMergeMaps, SEED_PACKS } from './emoji_engine.js';
 import { aiConfig, aiSave, aiGenerate, aiTest, emojiPacks, emojiAddPack, emojiRemovePack } from './ai.js';
 
 async function telegram(env, method, data = {}) {
@@ -142,7 +143,12 @@ async function webApi(request, env, url) {
   if (action === 'emoji') {
     const uid = identity.user.id;
     const op = data.op || 'list';
-    if (op === 'list') return emojiPacks(env, uid);
+    if (op === 'list') return { ...(await emojiPacks(env, uid)), seed: SEED_PACKS };
+    if (op === 'seed') return { seed: SEED_PACKS };
+    if (op === 'preview') {
+      const packs = (await env.RICHKV.get('emo:' + uid, 'json')) || [];
+      return { html: emojiPremiumize(String(data.html || ''), emojiMergeMaps(packs)) };
+    }
     if (op === 'add') return emojiAddPack(env, uid, data, telegram);
     if (op === 'remove') return emojiRemovePack(env, uid, data);
     throw fail('Unknown emoji action.', 404);

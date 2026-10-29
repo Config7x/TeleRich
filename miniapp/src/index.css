@@ -1,3 +1,4 @@
+@import './home.css';
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;450;500;550;600;650;700;750;800&family=Manrope:wght@500;600;650;700;750;800&family=Vazirmatn:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
@@ -228,3 +229,8 @@ input:focus,textarea:focus,select:focus{outline:none;border-color:#37564a;box-sh
 .format-toolbar .tool-emoji{color:var(--gold)}
 .ai-config>summary{list-style:none}
 .ai-config>summary::-webkit-details-marker{display:none}
+.emoji-seed{margin:6px 0 10px}
+.emoji-seed>span{font-size:11px;color:var(--muted);font-weight:550}
+.emoji-seed>div{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.emoji-seed button{font-size:11px;padding:6px 10px;border-radius:999px;background:var(--surface);border:1px solid var(--border-soft);color:var(--muted);direction:ltr}
+.emoji-seed button:hover{border-color:var(--mint);color:var(--mint)}

@@ -245,6 +245,52 @@ export const templates: Template[] = [
     ],
   },
   {
+    id: 'tutorial',
+    name: 'آموزش گام‌به‌گام',
+    icon: '🎓',
+    build: () => [
+      { ...(b('heading') as any), level: 1, text: '🎓 اتصال در ۳ گام' },
+      { ...(b('text') as any), text: '۱. اپ را نصب کنید\n۲. کانفیگ را کپی کنید\n۳. روی + بزنید و Import کنید' },
+      { ...(b('quote') as any), text: 'vless://...', by: 'کانفیگ خود را اینجا بگذارید', expandable: false },
+      { ...(b('buttons') as any), rows: [[
+        { id: uid(), label: '📥 دانلود اپ', type: 'url', style: 'primary', url: 'https://t.me/Config7x' },
+      ]] },
+    ],
+  },
+  {
+    id: 'giveaway',
+    name: 'قرعه‌کشی و جایزه',
+    icon: '🎁',
+    build: () => [
+      { ...(b('heading') as any), level: 1, text: '🎁 قرعه‌کشی هفته' },
+      { ...(b('text') as any), text: 'جایزه: ۳ کانفیگ یک‌ماهه ویژه\nشرط: ری‌اکشن + کامنت' },
+      { ...(b('quote') as any), text: 'پایان: جمعه ۲۲:۰۰', by: 'برنده‌ها در کانال اعلام می‌شوند' },
+      { ...(b('buttons') as any), rows: [[
+        { id: uid(), label: '📢 کانال ما', type: 'url', style: 'success', url: 'https://t.me/Config7x' },
+      ]] },
+    ],
+  },
+  {
+    id: 'changelog',
+    name: 'تغییرات نسخه',
+    icon: '🧩',
+    build: () => [
+      { ...(b('heading') as any), level: 1, text: '🧩 نسخه ۲.۰ منتشر شد' },
+      { ...(b('text') as any), text: '• سرعت اتصال بیشتر\n• رفع قطعی‌های متوالی\n• رابط کاربری تازه' },
+      { ...(b('quote') as any), text: 'به‌روزرسانی از طریق کانال انجام می‌شود', by: 'ممنون که همراهی' },
+    ],
+  },
+  {
+    id: 'faq',
+    name: 'پرسش‌های پرتکرار',
+    icon: '💬',
+    build: () => [
+      { ...(b('heading') as any), level: 1, text: '💬 پرسش‌های پرتکرار' },
+      { ...(b('details') as any), text: 'اگر وصل نشد چه کنم؟\nیک بار اپ را ببندید و دوباره باز کنید؛ اگر حل نشد کانفیگ جدید بگیرید.', summary: 'اتصال برقرار نمی‌شود' },
+      { ...(b('details') as any), text: 'چند دستگاه؟\nروی هر کانفیگ حداکثر دو دستگاه.', summary: 'تعداد دستگاه' },
+    ],
+  },
+  {
     id: 'blank',
     name: 'از صفر',
     icon: '✧',

@@ -1,7 +1,5 @@
 import { useMemo, useState } from 'react';
-import {
-  ArrowDown, ArrowUp, Check, ChevronDown, Copy, Layers, Plus, Sparkles, Trash2, Wand2, X, Eye, Send,
-} from 'lucide-react';
+import {ArrowDown, ArrowUp, Check, ChevronDown, Copy, Layers, Plus, Sparkles, Trash2, Wand2, X, Eye, Send, Smile} from 'lucide-react';
 import { RichPreview, detectRtl } from './Renderer';
 import { KINDS, CATS, KIND_MAP, countIn } from './library';
 import {
@@ -60,9 +58,9 @@ const icons: Record<Block['kind'], string> = {
   math: '∑',
 };
 
-type Props = { lang: 'en' | 'fa'; onApply: (html: string) => void };
+type Props = { lang: 'en' | 'fa'; onApply: (html: string) => void; onAi?: () => void; onEmoji?: () => void };
 
-export default function Composer({ lang, onApply }: Props) {
+export default function Composer({ lang, onApply, onAi, onEmoji }: Props) {
   const fa = lang === 'fa';
   const t = (en: string, faText: string) => (fa ? faText : en);
   const [blocks, setBlocks] = useState<Block[]>(() => read<Block[]>('tr-blocks', templates[0].build()));
@@ -134,6 +132,10 @@ export default function Composer({ lang, onApply }: Props) {
           <h2>{t('Build your post by tapping', 'پستت را با لمس بساز')}</h2>
           <p>{t('Pick a block, fill the fields, watch it appear. No tags, no formatting rules.', 'بلوک را انتخاب کن، فیلدها را پر کن، همان لحظه در پیش‌نمایش ببین. بدون تگ و بدون فرمت دستی.')}</p>
         </div>
+        {(onAi || onEmoji) && <div className="cmp-quick">
+          {onAi && <button onClick={onAi}><Sparkles size={15} />{t('Write with AI', 'نوشتن با AI')}</button>}
+          {onEmoji && <button onClick={onEmoji}><Smile size={15} />{t('Emoji', 'ایموجی')}</button>}
+        </div>}
         <div className="cmp-chips">
           <span className="cmp-step"><b>۱</b> {t('Add blocks', 'بلوک بچین')}</span>
           <span className="cmp-step"><b>۲</b> {t('Preview', 'پیش‌نمایش')}</span>
