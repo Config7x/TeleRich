@@ -2,6 +2,11 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "telerich",
   "main": "worker/worker.js",
+  "assets": {
+    "directory": "./static",
+    "binding": "ASSETS",
+    "not_found_handling": "none"
+  },
   "workers_dev": true,
   "routes": [
     { "pattern": "telerich.config7x.dpdns.org", "custom_domain": true }
@@ -17,6 +22,7 @@
     "FREE_LIMIT": "10",
     "REF_BONUS": "10",
     "QUOTA_EXEMPT": "7886358210",
-    "PUBLIC_URL": ""
+    "PUBLIC_URL": "",
+    "PREMIUM_EMOJI": "1"
   }
 }

@@ -24,11 +24,27 @@ const safeText = v => String(v ?? '')
   .replace(/[\ud800-\udbff](?![\udc00-\udfff])/g, '\u2573')
   .replace(/(?<![\ud800-\udbff])[\udc00-\udfff]/g, '\u2573')
   .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '');
+
+import { premiumOff, premiumMarkup, premiumText, stripPremium } from './premium.js';
+
 async function telegram(env, method, data = {}) {
   if (!env.BOT_TOKEN) throw fail('BOT_TOKEN is not configured on the Worker.', 503);
   const send = payload => fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/${method}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-  let response = await send(data);
+  let outbound = data;
+  if (!premiumOff(env)) {
+    if (outbound.reply_markup) outbound.reply_markup = premiumMarkup(outbound.reply_markup);
+    if (outbound.text) outbound.text = premiumText(outbound.text);
+    if (outbound.rich_message?.html) outbound.rich_message = { ...outbound.rich_message, html: premiumText(outbound.rich_message.html) };
+  }
+  let response = await send(outbound);
   let body = await response.json();
+  // Premium emoji are rejected on accounts without Premium: fall back to plain once.
+  if (!body.ok && /emoji|CUSTOM_EMOJI|BUTTON_/i.test(body.description || '') && !premiumOff(env)) {
+    console.error('PREMIUM-FALLBACK', method, body.description);
+    outbound = stripPremium(outbound);
+    response = await send(outbound);
+    body = await response.json();
+  }
   // Telegram rejects lone-surrogate text with a UTF-8 error; log the culprit and retry sanitized.
   if (!body.ok && /encoded in UTF-8/.test(body.description || '') && data.reply_markup) {
     console.error('UTF8-DUMP', method, JSON.stringify(data.reply_markup));
