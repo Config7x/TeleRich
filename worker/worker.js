@@ -243,10 +243,9 @@ async function webApi(request, env, url) {
 function menu(lang, origin) {
   const fa = lang === 'fa';
   return { inline_keyboard: [
-    [{ text: fa ? '✨ ساخت و ویرایش پست' : '✨ Create & edit a post', web_app: { url: origin }, style: 'primary' }],
-    [{ text: fa ? '🎨 قالب‌های آماده' : '🎨 Templates', callback_data: `templates:${lang}` }, { text: fa ? '🧩 بلوک‌ها' : '🧩 Blocks', callback_data: `list:${lang}:Blocks:0` }],
-    [{ text: fa ? '📖 متن ریچ' : '📖 Rich text', callback_data: `list:${lang}:Rich text:0` }, { text: fa ? '🖼 مدیا' : '🖼 Media', callback_data: `list:${lang}:Media:0` }],
-    [{ text: fa ? '🚀 دمو' : '🚀 Demo', callback_data: `demo:${lang}:0`, style: 'success' }, { text: fa ? '🎁 سهمیه' : '🎁 Quota', callback_data: `quota:${lang}` }],
+    [{ text: fa ? '✨ استودیو' : '✨ Studio', web_app: { url: origin }, style: 'primary' }, { text: fa ? '🎨 قالب‌ها' : '🎨 Templates', callback_data: `templates:${lang}` }],
+    [{ text: fa ? '🧩 بلوک‌ها' : '🧩 Blocks', callback_data: `list:${lang}:Blocks:0` }, { text: fa ? '📖 متن ریچ' : '📖 Rich text', callback_data: `list:${lang}:Rich text:0` }],
+    [{ text: fa ? '🖼 مدیا' : '🖼 Media', callback_data: `list:${lang}:Media:0` }, { text: fa ? '🚀 دمو' : '🚀 Demo', callback_data: `demo:${lang}:0` }],
     [{ text: fa ? '🎯 مقصد ارسال' : '🎯 Destination', callback_data: `dest:${lang}` }, { text: fa ? '🎁 سهمیه' : '🎁 Quota', callback_data: `quota:${lang}` }],
     [{ text: fa ? '🌐 English' : '🌐 فارسی', callback_data: `home:${fa ? 'en' : 'fa'}` }, { text: fa ? 'ℹ️ درباره' : 'ℹ️ About', callback_data: `about:${lang}` }]
   ] };
@@ -258,7 +257,7 @@ function replyBoard(lang, origin) {
   return { keyboard: [
     [{ text: fa ? '✨ ساخت پست' : '✨ Create a post', web_app: { url: origin } }, { text: fa ? '🎨 قالب‌ها' : '🎨 Templates' }],
     [{ text: fa ? '📚 راهنما' : '📚 Guides' }, { text: fa ? '🎁 سهمیه' : '🎁 Quota' }],
-  ], resize_keyboard: true, is_persistent: true, input_field_placeholder: fa ? 'یکی از دکمه‌ها را بزن…' : 'Tap a button…' };
+  ], resize_keyboard: true, is_persistent: true, input_field_placeholder: fa ? 'یک گزینه را بزن…' : 'Tap an option…' };
 }
 
 const foot = (lang, origin, extra) => {
@@ -385,7 +384,7 @@ async function plain(env, chatId, text, markup, messageId) {
 async function home(env, chatId, lang, origin, messageId) {
   const en = '<b>✨ TeleRich · Rich Message Studio</b>\n\nSend HTML or Markdown to render a rich message with Bot API 10.3.\n\nExplore individual guides, code examples and live demos. Open the studio for button styles, row layout, media and channel publishing.\n\n/start — menu\n/help — guides\n/post — channel studio\n/ref — quota & invites\n/about — credits';
   const fa = '<b>✨ TeleRich · استودیوی پیام ریچ</b>\n\nمتن HTML یا Markdown بفرستید تا با Bot API 10.3 به پیام ریچ تبدیل شود.\n\nراهنمای هر قابلیت، نمونه کد و دموی زنده در دسترس است. برای تنظیم رنگ و ردیف دکمه، مدیا و ارسال به کانال، استودیو را باز کنید.\n\n/start — منو\n/help — راهنما\n/post — پست‌ساز\n/ref — سهمیه و دعوت\n/about — درباره';
-  const text = en + '\n\n〰️〰️〰️〰️〰️〰️〰️〰️\n\n' + fa;
+  const text = lang === 'fa' ? fa : en;
   const kb = menu(lang, origin);
   if (await quotaExempt(env, chatId)) kb.inline_keyboard.unshift([{ text: lang === 'fa' ? '⚙️ تنظیمات ربات' : '⚙️ Bot settings', callback_data: `settings:${lang}` }]);
   return plain(env, chatId, text, kb, messageId);
