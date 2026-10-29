@@ -248,11 +248,12 @@ async function webApi(request, env, url) {
 function menu(lang, origin) {
   const fa = lang === 'fa';
   return { inline_keyboard: [
-    [{ text: fa ? '✨ استودیو' : '✨ Studio', web_app: { url: origin }, style: 'primary' }, { text: fa ? '🎨 قالب‌ها' : '🎨 Templates', callback_data: `templates:${lang}` }],
+    [{ text: fa ? '✨ باز کردن استودیو' : '✨ Open the studio', web_app: { url: origin }, style: 'primary' }],
+    [{ text: fa ? '🎨 قالب‌ها' : '🎨 Templates', callback_data: `templates:${lang}` }, { text: fa ? '🚀 دمو' : '🚀 Demo', callback_data: `demo:${lang}:0` }],
     [{ text: fa ? '🧩 بلوک‌ها' : '🧩 Blocks', callback_data: `list:${lang}:Blocks:0` }, { text: fa ? '📖 متن ریچ' : '📖 Rich text', callback_data: `list:${lang}:Rich text:0` }],
-    [{ text: fa ? '🖼 مدیا' : '🖼 Media', callback_data: `list:${lang}:Media:0` }, { text: fa ? '🚀 دمو' : '🚀 Demo', callback_data: `demo:${lang}:0` }],
-    [{ text: fa ? '🎯 مقصد ارسال' : '🎯 Destination', callback_data: `dest:${lang}` }, { text: fa ? '🎁 سهمیه' : '🎁 Quota', callback_data: `quota:${lang}` }],
-    [{ text: fa ? '🌐 English' : '🌐 فارسی', callback_data: `home:${fa ? 'en' : 'fa'}` }, { text: fa ? 'ℹ️ درباره' : 'ℹ️ About', callback_data: `about:${lang}` }]
+    [{ text: fa ? '🖼 مدیا' : '🖼 Media', callback_data: `list:${lang}:Media:0` }, { text: fa ? '🎯 مقصد ارسال' : '🎯 Destination', callback_data: `dest:${lang}` }],
+    [{ text: fa ? '🎁 سهمیه' : '🎁 Quota', callback_data: `quota:${lang}` }, { text: fa ? 'ℹ️ درباره' : 'ℹ️ About', callback_data: `about:${lang}` }],
+    [{ text: fa ? '🌐 English' : '🌐 فارسی', callback_data: `home:${fa ? 'en' : 'fa'}` }]
   ] };
 }
 
@@ -261,7 +262,7 @@ function replyBoard(lang, origin) {
   const fa = lang === 'fa';
   return { keyboard: [
     [{ text: fa ? '✨ ساخت پست' : '✨ Create a post', web_app: { url: origin } }, { text: fa ? '🎨 قالب‌ها' : '🎨 Templates' }],
-    [{ text: fa ? '📚 راهنما' : '📚 Guides' }, { text: fa ? '🎁 سهمیه' : '🎁 Quota' }],
+    [{ text: fa ? '🎁 سهمیه' : '🎁 Quota' }, { text: fa ? '📚 راهنما' : '📚 Guides' }],
   ], resize_keyboard: true, is_persistent: true, input_field_placeholder: fa ? 'یک گزینه را بزن…' : 'Tap an option…' };
 }
 
@@ -313,9 +314,10 @@ async function settingsPanel(env, chatId, lang, origin, messageId) {
     `${fa ? '🎯 مقصد ارسال' : '🎯 Destination'}: <b>${d ? destLabel(d) : (fa ? 'انتخاب نشده' : 'not set')}</b>\n` +
     `${fa ? '🔒 عضویت اجباری' : '🔒 Forced join'}: <b>${jl.length ? jl.map((t) => t.title || t.id).join(' + ') : (fa ? 'خاموش' : 'off')}</b>`;
   return plain(env, chatId, text, { inline_keyboard: [
+    [{ text: fa ? '✨ باز کردن استودیو' : '✨ Open the studio', web_app: { url: origin }, style: 'primary' }],
     [{ text: fa ? '🎯 مقصد ارسال' : '🎯 Destination', callback_data: `dest:${lang}` }, { text: fa ? '🔒 عضویت اجباری' : '🔒 Forced join', callback_data: `join:${lang}` }],
     [{ text: fa ? '🤖 هوش مصنوعی' : '🤖 AI', callback_data: `aiset:${lang}` }, { text: fa ? '👥 کاربران' : '👥 Users', callback_data: `users:${lang}` }],
-    [{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }, { text: fa ? '✨ استودیو' : '✨ Studio', web_app: { url: origin }, style: 'primary' }]
+    [{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }]
   ] }, messageId);
 }
 async function aiPanel(env, chatId, lang, origin, messageId) {
@@ -327,7 +329,7 @@ async function aiPanel(env, chatId, lang, origin, messageId) {
     `${fa ? 'کلید' : 'Key'}: ${cfg.hasKey ? '✅' : '⛔'}\n\n${rows}\n\n` +
     (fa ? 'ثبت کلید:\n<code>/key gemini AIza...</code>\nآزمایش: <code>/aitest</code>\nتغییر مدل: <code>/model gemini-2.5-flash</code>'
         : 'Save a key:\n<code>/key gemini AIza...</code>\nTest: <code>/aitest</code>\nModel: <code>/model gemini-2.5-flash</code>');
-  return plain(env, chatId, text, { inline_keyboard: [[{ text: fa ? '⚙️ تنظیمات' : '⚙️ Settings', callback_data: `settings:${lang}` }, { text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }]] }, messageId);
+  return plain(env, chatId, text, { inline_keyboard: [[{ text: fa ? '✨ باز کردن استودیو' : '✨ Open the studio', web_app: { url: origin }, style: 'primary' }], [{ text: fa ? '⚙️ تنظیمات' : '⚙️ Settings', callback_data: `settings:${lang}` }, { text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }]] }, messageId);
 }
 
 
@@ -350,6 +352,7 @@ async function joinPanel(env, chatId, lang, origin, messageId) {
     `\n\n${fa ? 'ربات باید در گروه عضو باشد (مدیر بودن لازم نیست).' : 'The bot must be a member of the group.'}`;
   const rows = [];
   list.forEach((t, i) => rows.push([{ text: `${fa ? '🗑 حذف' : '🗑 Remove'} ${t.title || t.id}`, callback_data: `joinrm:${lang}:${i}`, style: 'danger' }]));
+  rows.push([{ text: fa ? '✨ باز کردن استودیو' : '✨ Open the studio', web_app: { url: origin }, style: 'primary' }]);
   rows.push([{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }]);
   return plain(env, chatId, text, { inline_keyboard: rows }, messageId);
 }
@@ -366,8 +369,9 @@ async function destPanel(env, chatId, lang, origin, messageId) {
     (fa ? '• یک پیام از گروه یا کانال به همین ربات <b>فوروارد</b> کن — خودش تشخیص می‌دهد.\n• یا بنویس <code>/dest @username</code> یا <code>/dest -100…</code>' : '• <b>Forward</b> any message from the group or channel here and I pick it up.\n• Or send <code>/dest @username</code> / <code>/dest -100…</code>') +
     `\n\n${fa ? 'ربات باید در گروه عضو و مدیر باشد (مجوز ارسال پیام).' : 'The bot must be an admin in that chat with Post messages permission.'}`;
   const rows = [];
+  rows.push([{ text: fa ? '✨ باز کردن استودیو' : '✨ Open the studio', web_app: { url: origin }, style: 'primary' }]);
+  rows.push([{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }]);
   if (d) rows.push([{ text: fa ? '🗑 پاک کردن مقصد' : '🗑 Clear destination', callback_data: `destclear:${lang}`, style: 'danger' }]);
-  rows.push([{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }, { text: fa ? '✨ استودیو' : '✨ Studio', web_app: { url: origin }, style: 'primary' }]);
   return plain(env, chatId, text, { inline_keyboard: rows }, messageId);
 }
 
@@ -377,8 +381,9 @@ async function aboutPanel(env, chatId, lang, origin, messageId) {
     '<a href="https://t.me/Rich7xbot">@Rich7xbot</a> · <a href="https://t.me/Config7x">@Config7x</a>' +
     (fa ? '\n\nدستورها: /start /post /ref /about /whoami' : '\n\nCommands: /start /post /ref /about /whoami');
   return plain(env, chatId, text, { inline_keyboard: [
+    [{ text: fa ? '✨ باز کردن استودیو' : '✨ Open the studio', web_app: { url: origin }, style: 'primary' }],
     [{ text: fa ? '🆕 تازه‌های Bot API 10.3' : '🆕 Bot API 10.3 changes', callback_data: `updates:${lang}` }],
-    [{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }, { text: fa ? '✨ استودیو' : '✨ Studio', web_app: { url: origin }, style: 'primary' }],
+    [{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }],
   ] }, messageId);
 }
 
@@ -391,7 +396,7 @@ async function home(env, chatId, lang, origin, messageId) {
   const fa = '<b>✨ TeleRich · استودیوی پیام ریچ</b>\n\nمتن HTML یا Markdown بفرستید تا با Bot API 10.3 به پیام ریچ تبدیل شود.\n\nراهنمای هر قابلیت، نمونه کد و دموی زنده در دسترس است. برای تنظیم رنگ و ردیف دکمه، مدیا و ارسال به کانال، استودیو را باز کنید.\n\n/start — منو\n/help — راهنما\n/post — پست‌ساز\n/ref — سهمیه و دعوت\n/about — درباره';
   const text = lang === 'fa' ? fa : en;
   const kb = menu(lang, origin);
-  if (await quotaExempt(env, chatId)) kb.inline_keyboard.unshift([{ text: lang === 'fa' ? '⚙️ تنظیمات ربات' : '⚙️ Bot settings', callback_data: `settings:${lang}` }]);
+  if (await quotaExempt(env, chatId)) kb.inline_keyboard.splice(Math.max(0, kb.inline_keyboard.length - 1), 0, [{ text: lang === 'fa' ? '⚙️ تنظیمات ربات' : '⚙️ Bot settings', callback_data: `settings:${lang}` }]);
   return plain(env, chatId, text, kb, messageId);
 }
 function reconstruct(message) {
