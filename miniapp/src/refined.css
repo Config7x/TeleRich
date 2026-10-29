@@ -1,0 +1,148 @@
+/* ─────────────────────────────────────────────────────────────────────
+   TeleRich · refinement layer (loaded last)
+   Purpose: one flat, quiet surface system. No glows, no gradients on
+   containers, no decorative rotation. A single accent, a four size type
+   scale, two radii, three weights, and a 4/8/12/16/24 spacing rhythm.
+   ───────────────────────────────────────────────────────────────────── */
+:root{
+  --bg:#0b1015;
+  --sidebar:#0e141a;
+  --panel:#111820;
+  --surface:#18212a;
+  --surface-2:#1d2731;
+  --border:#222e39;
+  --border-soft:#1a242e;
+  --text:#e9eff4;
+  --muted:#93a1ae;
+  --subtle:#6b7a88;
+  --accent:#5fe0bd;
+  --accent-ink:#07120e;
+  --r-1:10px; --r-2:14px; --r-pill:999px;
+  --shadow-modal:0 24px 60px -30px rgba(0,0,0,.9);
+  /* legacy names kept so older rules resolve to the same tokens */
+  --mint:var(--accent); --mint-dark:#12241f; --editor:#0a1015;
+  --r-card:var(--r-2); --r-tile:var(--r-1);
+  --ctl-sm:38px; --ctl-md:44px; --ctl-lg:48px;
+  --pad-card:16px; --gap-row:10px;
+}
+
+/* 1 · canvas: flat, no ambient gradient */
+.app,.app.light{background:var(--bg)!important}
+.app{background-image:none!important;color:var(--text);font-size:14px;line-height:1.6}
+.app *{border-color:var(--border)}
+::selection{background:#2c6557;color:#fff}
+
+/* 2 · surfaces: one border, two radii, no glow, no inset trickery */
+.app .panel,.app .card,.app .empty-state,.app .home-empty,.app .draft-card,.app .template-card,
+.app .release-card,.app .guide-detail,.app .dest-setting,.app .cmp-phone,.app .code-box{
+  background:var(--panel)!important;background-image:none!important;
+  border:1px solid var(--border)!important;border-radius:var(--r-2)!important;box-shadow:none!important;
+}
+.app .sidebar{background:var(--sidebar)!important;background-image:none!important;border-right:1px solid var(--border)}
+.app .topbar{background:var(--panel)!important;background-image:none!important;backdrop-filter:none;border-bottom:1px solid var(--border);height:60px}
+.app .release-banner,.app .upgrade-card{background:var(--surface)!important;background-image:none!important;border:1px solid var(--border)!important;border-radius:var(--r-2)!important}
+.app .upgrade-card:after{display:none}
+.app .brand-mark{transform:none!important;box-shadow:none!important;border-radius:var(--r-1);background:var(--accent);color:var(--accent-ink)}
+.app .brand-mark svg{transform:none!important}
+
+/* 3 · type scale: 11 label · 12.5 secondary · 14 body · 15/17 section · 22/26 title */
+.app h1,.app .page-heading h1{font-size:24px;line-height:1.3;font-weight:700;letter-spacing:-.02em}
+.app h2,.app .panel-title h2,.app .cmp-hero h2,.app .dest-heading strong{font-size:15px;line-height:1.45;font-weight:600;letter-spacing:0}
+.app h3,.app .guide-detail h3{font-size:14px;font-weight:600}
+.app h4{font-size:13.5px;font-weight:600}
+.app p,.app .modal-description,.app .info-box span,.app .setting-row p,.app .dest-heading p,
+.app .rich-content,.app .guide-detail p,.app .empty-state p,.app .home-empty p{font-size:12.5px;line-height:1.7}
+.app .eyebrow,.app .nav-label,.app kbd,.app .badge,.app .chip,.app .small-tag,.app .nav-small,
+.app .nav-count,.app .autosaved,.app .template-badge,.app .template-chip-count,.app .banner-version,
+.app .breadcrumbs,.app .language-button{font-size:11px;font-weight:500;letter-spacing:.05em}
+.app .nav-label,.app .eyebrow{color:var(--subtle)}
+.app button,.app .button,.app .nav-item,.app input,.app select,.app textarea{font-size:13.5px}
+.app .button.primary,.app .modal-actions button.primary{font-size:14px}
+.app .icon-button{width:34px;height:34px;border-radius:var(--r-1);color:var(--muted)}
+.app .icon-button:hover{background:var(--surface);color:var(--text)}
+
+/* 4 · controls: quiet fills, one accent, no lift */
+.app .button{border-radius:var(--r-1)!important;box-shadow:none!important;transform:none!important;font-weight:500}
+.app .button.primary,.app .modal-actions button.primary{
+  background:var(--accent)!important;background-image:none!important;color:var(--accent-ink)!important;
+  border-color:transparent!important;font-weight:600;box-shadow:none!important
+}
+.app .button.primary:hover{background:#74e8c8!important;transform:none!important;box-shadow:none!important}
+.app .button.secondary{background:var(--surface)!important;color:var(--text)!important;border:1px solid var(--border)!important}
+.app .button.secondary:hover{background:var(--surface-2)!important;border-color:#2c3a47!important}
+.app .button.subtle,.app .text-button{background:transparent!important;border:1px solid var(--border)!important;color:var(--muted)!important}
+.app .button.subtle:hover,.app .text-button:hover{color:var(--text)!important;border-color:#2c3a47!important}
+.app .nav-item{border-radius:var(--r-1);height:44px;color:var(--muted)}
+.app .nav-item.active{background:var(--surface)!important;background-image:none!important;color:var(--text)!important;box-shadow:none!important}
+.app .nav-item.active:before{background:var(--accent);border-radius:2px;left:-12px}
+.app .nav-item.active svg{color:var(--accent)}
+.app input,.app select,.app textarea{background:var(--surface)!important;border:1px solid var(--border)!important;border-radius:var(--r-1)!important}
+.app input:focus,.app select:focus,.app textarea:focus{border-color:#3b7f6c!important;box-shadow:none!important}
+.app :is(button,a,input,select,textarea):focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.app button:active{transform:none}
+
+/* 5 · chips, badges, tabs: flat */
+.app .chip,.app .template-chip,.app .filter-tabs button,.app .template-badge{border-radius:var(--r-pill)!important;box-shadow:none!important}
+.app .filter-tabs button.active,.app .cmp-cat.active{background:var(--surface-2)!important;background-image:none!important;color:var(--text)!important;box-shadow:none!important}
+
+/* 6 · mobile: real reading sizes, comfortable targets, 16px gutters */
+@media (max-width:900px){
+  .app{font-size:14px}
+  .app main{padding:18px 16px 92px}
+  .app .panel,.app .card{padding:16px!important;border-radius:var(--r-2)!important}
+  .app h1,.app .page-heading h1{font-size:22px}
+  .app h2,.app .panel-title h2{font-size:15px}
+  .app p,.app .modal-description,.app .info-box span,.app .setting-row p{font-size:13.5px;line-height:1.7}
+  .app .eyebrow,.app .nav-label{font-size:11px}
+  .app button,.app .button,.app input,.app select,.app textarea{font-size:14px}
+  .app .button,.app button:not(.icon-button):not(.tabbar button){min-height:44px}
+  .app .icon-button{width:40px;height:40px}
+  .app .topbar{height:54px;padding:0 16px}
+  .app .tabbar{height:62px;border-top:1px solid var(--border);background:var(--panel)!important;background-image:none!important;backdrop-filter:none}
+  .app .tabbar button{font-size:11px;font-weight:500;color:var(--muted)}
+  .app .tabbar button.active,.app .tabbar button[aria-current]{color:var(--accent)}
+  .app .modal{border-radius:18px 18px 0 0!important}
+  .app .modal-actions{display:flex;gap:8px}
+}
+@media (min-width:901px){
+  .app main{padding:28px 32px 24px}
+  .app .panel{padding:18px}
+}
+
+/* 7 · home: the hero loses its orb, its gradient text and its glow */
+.app .home-hero{
+  background:var(--panel)!important;background-image:none!important;
+  border:1px solid var(--border)!important;border-radius:16px!important;padding:22px 20px!important;
+  box-shadow:none!important;overflow:hidden
+}
+.app .hero-orb{display:none!important}
+.app .home-hero h1,.app .home-hero .hero-title{
+  background:none!important;background-image:none!important;-webkit-background-clip:border-box!important;
+  background-clip:border-box!important;-webkit-text-fill-color:currentColor!important;
+  color:var(--text)!important;font-size:22px!important;font-weight:700!important;line-height:1.35!important;letter-spacing:-.01em
+}
+.app .home-hero b,.app .home-hero strong,.app .home-hero h2,.app .home-hero h3{font-weight:700!important}
+.app .home-hero small,.app .home-hero .eyebrow{font-weight:500!important}
+.app .hero-cta,.app .home-hero button{
+  background:var(--accent)!important;background-image:none!important;color:var(--accent-ink)!important;
+  border-radius:12px!important;box-shadow:none!important;font-weight:600!important;min-height:46px
+}
+.app .hero-cta:hover{background:#74e8c8!important;box-shadow:none!important;transform:none}
+.app .cta-ico{background:rgba(7,18,14,.12)!important;border-radius:10px!important;color:var(--accent-ink)!important}
+.app .stat-card,.app .quick-card,.app .hm-card{
+  background:var(--panel)!important;background-image:none!important;border:1px solid var(--border)!important;
+  border-radius:14px!important;box-shadow:none!important
+}
+.app .stat-card:hover,.app .quick-card:hover{border-color:#2c3a47!important;transform:none!important;box-shadow:none!important}
+.app .q-ico,.app .stat-ico,.app .hm-i,.app .cmp-lib-icon,.app .template-thumb-box,.app .workspace-avatar{
+  background:var(--surface)!important;background-image:none!important;border:1px solid var(--border-soft)!important;
+  border-radius:10px!important;color:var(--accent)!important
+}
+.app .q-ico svg,.app .stat-ico svg{color:inherit}
+.app .workspace-selector{border-radius:10px!important;background:var(--panel)!important}
+.app .nav-small,.app .nav-count,.app .badge,.app .template-badge{border-radius:999px!important;background:var(--surface)!important;border:1px solid var(--border-soft)!important;color:var(--muted)!important}
+.app small{font-weight:500}
+.app .stat-card b,.app .stat-card strong,.app .quick-card b,.app .quick-card strong{font-weight:700}
+.app .hero-orb{background:none!important;background-image:none!important;opacity:0!important}
+.app small,.app .stat-card small,.app .quick-card small,.app .hero-cta small{font-weight:500!important}
+.app .stat-card i,.app .quick-card i,.app i.dot{box-shadow:none!important}

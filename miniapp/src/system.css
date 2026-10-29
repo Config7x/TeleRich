@@ -30,13 +30,13 @@
 
 /* 3 · controls: three heights only ------------------------------------- */
 .app .button,.app button.button,.app .modal-actions button{
-  height:var(--ctl-md);padding-inline:16px;border-radius:var(--r-tile);font-size:13.5px;font-weight:600;
+  height:var(--ctl-md);padding-inline:16px;border-radius:var(--r-tile);font-size:14px;font-weight:600;
   display:inline-flex;align-items:center;justify-content:center;gap:7px;
 }
 .app .button.primary,.app .modal-actions button.primary{height:var(--ctl-lg);border-radius:14px;font-size:14px}
-.app .button.subtle,.app .text-button{height:var(--ctl-sm);padding-inline:12px;font-size:12.5px;border-radius:10px}
+.app .button.subtle,.app .text-button{height:var(--ctl-sm);padding-inline:12px;font-size:13.5px;border-radius:10px}
 .app .filter-tabs button,.app .templates-chips button,.app .tabs button,.app .cmp-lib-cats button{
-  height:34px;padding-inline:13px;border-radius:var(--r-pill);font-size:12px;font-weight:600;
+  height:34px;padding-inline:13px;border-radius:var(--r-pill);font-size:12.5px;font-weight:600;
 }
 .app .badge,.app kbd,.app .cmp-step,.app .template-badge,.app .template-chip-count{border-radius:var(--r-pill)}
 .app input,.app select,.app textarea,.app .field input,.app .field select,.app .field textarea{
@@ -53,7 +53,7 @@
 .app .page-heading{border:0;background:transparent;padding:0 0 14px;margin:0}
 .app .page-heading h1{font-size:24px;letter-spacing:-.02em}
 .app .page-heading p,.app .eyebrow{color:var(--muted)}
-.app .eyebrow{font-size:10.5px;letter-spacing:.12em}
+.app .eyebrow{font-size:11px;letter-spacing:.12em}
 
 /* 6 · accessibility ----------------------------------------------------- */
 .app :is(button,a,input,select,textarea):focus-visible{outline:2px solid var(--mint);outline-offset:2px;border-radius:var(--r-tile)}
@@ -79,29 +79,29 @@
 .app .template-card,.app .quick-card{padding:14px}
 .app .panel,.app .card{padding:var(--pad-card)}
 .app .template-use-btn,.app .cmp-apply,.app .cmp-ghost,.app .cmp-show-preview{
-  height:var(--ctl-md);padding-inline:14px;border-radius:var(--r-tile);font-size:13px;font-weight:600;
+  height:var(--ctl-md);padding-inline:14px;border-radius:var(--r-tile);font-size:14px;font-weight:600;
 }
 .app .cmp-apply{height:var(--ctl-lg);border-radius:14px;font-size:14px}
 /* one icon weight inside dense editors */
 .app .cmp-block-tools svg,.app .cmp-toolbar svg{width:14px;height:14px}
 .app .cmp-block-tools button{width:28px;height:28px;padding:0;border-radius:8px}
-.app .template-card-meta,.app .template-chip-count{font-size:11.5px}
+.app .template-card-meta,.app .template-chip-count{font-size:12.5px}
 /* a stray 4px radius on table cells and inline code, next to 16px cards */
 .app .guide-example pre,.app .code-box,.app table td,.app table th{border-radius:0}
 .app .guide-example pre{border-radius:var(--r-card);padding:14px}
 
 /* 9 · AI panel: visible state, errors stay on screen ------------------- */
 .app .key-status{display:flex;flex-wrap:wrap;gap:6px;margin:2px 0 12px}
-.app .chip{font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;border:1px solid var(--border-soft);color:var(--muted);background:var(--surface);direction:ltr}
+.app .chip{font-size:12.5px;font-weight:600;padding:5px 10px;border-radius:999px;border:1px solid var(--border-soft);color:var(--muted);background:var(--surface);direction:ltr}
 .app .chip.ok{color:var(--mint);border-color:#26443a;background:rgba(99,230,190,.08)}
 .app .chip.warn{color:var(--gold);border-color:#3d3423;background:rgba(245,196,81,.08)}
-.app .ai-msg{margin:10px 0 0;font-size:12.5px;line-height:1.6;padding:10px 12px;border-radius:12px;border:1px solid var(--border-soft);background:var(--surface)}
+.app .ai-msg{margin:10px 0 0;font-size:13.5px;line-height:1.6;padding:10px 12px;border-radius:12px;border:1px solid var(--border-soft);background:var(--surface)}
 .app .ai-msg.ok{color:var(--mint);border-color:#26443a}
 .app .ai-msg.err{color:#ff9a8a;border-color:#5a2b26;background:rgba(255,120,100,.07)}
 
 /* 10 · destination setting */
 .app .dest-setting{padding:4px 0 14px;margin-bottom:6px;border-bottom:1px solid var(--border-soft)}
 .app .dest-heading{display:flex;gap:11px;align-items:flex-start;margin-bottom:12px}
-.app .dest-heading strong{display:block;font-size:14px;font-weight:650}
-.app .dest-heading p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.app .dest-heading strong{display:block;font-size:14px;font-weight:600}
+.app .dest-heading p{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
 .app .dest-heading svg{color:var(--mint);margin-top:2px}

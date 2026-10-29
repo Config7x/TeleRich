@@ -307,7 +307,8 @@ async function settingsPanel(env, chatId, lang, origin, messageId) {
   const jl = await joinList(env);
   const text = `<b>${fa ? '⚙️ تنظیمات ربات' : '⚙️ Bot settings'}</b>\n\n` +
     `${fa ? '🎯 مقصد ارسال' : '🎯 Destination'}: <b>${d ? destLabel(d) : (fa ? 'انتخاب نشده' : 'not set')}</b>\n` +
-    `${fa ? '🔒 عضویت اجباری' : '🔒 Forced join'}: <b>${jl.length ? jl.map((t) => t.title || t.id).join(' + ') : (fa ? 'خاموش' : 'off')}</b>`;
+    `${fa ? '🔒 عضویت اجباری' : '🔒 Forced join'}: <b>${jl.length ? jl.map((t) => t.title || t.id).join(' + ') : (fa ? 'خاموش' : 'off')}</b>` +
+    `\n${fa ? 'اشتراک مدیریت جوین' : 'Forced join licence'}: <b>${await hasJoinPro(env, chatId) ? (fa ? 'فعال' : 'active') : `${joinProStars(env)} ⭐`}</b>`;
   return plain(env, chatId, text, { inline_keyboard: [
     [{ text: fa ? '🎯 مقصد ارسال' : '🎯 Destination', callback_data: `dest:${lang}` }, { text: fa ? '🔒 عضویت اجباری' : '🔒 Forced join', callback_data: `join:${lang}` }],
     [{ text: fa ? '🤖 هوش مصنوعی' : '🤖 AI', callback_data: `aiset:${lang}` }, { text: fa ? '👥 کاربران' : '👥 Users', callback_data: `users:${lang}` }],
@@ -326,10 +327,42 @@ async function aiPanel(env, chatId, lang, origin, messageId) {
   return plain(env, chatId, text, { inline_keyboard: [[{ text: fa ? '⚙️ تنظیمات' : '⚙️ Settings', callback_data: `settings:${lang}` }, { text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }]] }, messageId);
 }
 
+
+// ── forced-join licence (Telegram Stars) ─────────────────────────────
+// Free tier: one required chat. Paid: up to JOIN_PRO_LIMIT chats.
+const joinProStars = (env) => Number(env.JOIN_PRO_STARS || 250);
+const joinProLimit = (env) => Number(env.JOIN_PRO_LIMIT || 5);
+const planKey = (uid) => 'plan:' + uid;
+async function readPlan(env, uid) { try { return (await env.RICHKV.get(planKey(uid), 'json')) || null; } catch (e) { return null; } }
+async function grantJoinPro(env, uid, stars) {
+  const plan = { joinPro: true, stars: stars || 0, at: new Date().toISOString() };
+  await env.RICHKV.put(planKey(uid), JSON.stringify(plan));
+  return plan;
+}
+async function hasJoinPro(env, uid) {
+  if (quotaExempt(env, uid)) return true;
+  const plan = await readPlan(env, uid);
+  return !!(plan && plan.joinPro);
+}
+async function joinPaywall(env, chatId, lang, origin, messageId) {
+  const fa = lang === 'fa';
+  const price = joinProStars(env), limit = joinProLimit(env);
+  const text = `<b>${fa ? '🔒 مدیریت جوین اجباری' : '🔒 Forced join manager'}</b>\n\n` +
+    (fa ? `نسخهٔ رایگان فقط یک مقصد را پشتیبانی می‌کند.\nبا خرید این قابلیت می‌توانی تا <b>${limit}</b> کانال و گروه را هم‌زمان اجباری کنی، برای هر کدام دکمهٔ عضویت جدا بگذاری و لیست را هر وقت خواستی عوض کنی.`
+        : `The free tier covers one chat. Buy the feature to require up to <b>${limit}</b> channels and groups at once, each with its own join button.`) +
+    `\n\n<b>${fa ? 'قیمت' : 'Price'}: ${price} ⭐ ${fa ? 'استارز تلگرام' : 'Telegram Stars'}</b>` +
+    (fa ? '\n<i>پرداخت یک‌باره، بدون تمدید ماهانه.</i>' : '\n<i>One-time, no monthly renewal.</i>');
+  return plain(env, chatId, text, { inline_keyboard: [
+    [{ text: fa ? `💫 خرید با ${price} استارز` : `💫 Buy for ${price} Stars`, callback_data: `buyjoin:${lang}`, style: 'success' }],
+    [{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }]
+  ] }, messageId);
+}
+
 async function joinPanel(env, chatId, lang, origin, messageId) {
   const fa = lang === 'fa';
   const list = await joinList(env);
   const me = await telegram(env, 'getMe');
+  const pro = await hasJoinPro(env, chatId);
   const checked = [];
   for (const t of list) {
     let reachable = true;
@@ -342,7 +375,10 @@ async function joinPanel(env, chatId, lang, origin, messageId) {
     '\n\n' + (checked.length ? checked.map((t) => `• ${t.type === 'group' || t.type === 'supergroup' ? '👥' : '📡'} <b>${t.title || t.id}</b> · <code>${t.id}</code>${t.reachable ? '' : (fa ? ' ⚠️ ربات عضو نیست' : ' ⚠️ bot not a member')}`).join('\n') : (fa ? '<i>هیچ مقصدی تنظیم نشده</i>' : '<i>none set</i>')) +
     `\n\n${fa ? 'افزودن:' : 'Add:'}\n` +
     (fa ? '• یک پیام از گروه یا کانال را به ربات <b>فوروارد</b> کن و دکمهٔ «جوین اجباری» را بزن.\n• یا بنویس <code>/join @username</code> یا <code>/join -100…</code>' : '• <b>Forward</b> a message from it and tap “Forced join”.\n• Or send <code>/join @username</code>') +
-    `\n\n${fa ? 'ربات باید در گروه عضو باشد (مدیر بودن لازم نیست).' : 'The bot must be a member of the group.'}`;
+    `\n\n${fa ? 'ربات باید در گروه عضو باشد (مدیر بودن لازم نیست).' : 'The bot must be a member of the group.'}` +
+    (pro
+      ? `\n\n✅ ${fa ? `اشتراک مدیریت جوین فعال است — تا ${joinProLimit(env)} مقصد` : `Forced join manager active — up to ${joinProLimit(env)} chats`}`
+      : `\n\n🔒 ${fa ? `رایگان: ۱ مقصد · حرفه‌ای: تا ${joinProLimit(env)} مقصد با ${joinProStars(env)} ⭐` : `Free: 1 chat · Pro: up to ${joinProLimit(env)} chats for ${joinProStars(env)} Stars`}`);
   const rows = [];
   list.forEach((t, i) => rows.push([{ text: `${fa ? '🗑 حذف' : '🗑 Remove'} ${t.title || t.id}`, callback_data: `joinrm:${lang}:${i}`, style: 'danger' }]));
   rows.push([{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }]);
@@ -825,6 +861,25 @@ async function joinGate(env, chatId, user, origin, callback) {
 }
 
 async function onUpdate(update, env, origin) {
+  // Telegram Stars: approve the payment sheet, then unlock on success.
+  if (update.pre_checkout_query) {
+    const q = update.pre_checkout_query;
+    const ok = String(q.invoice_payload || '').startsWith('joinpro:');
+    return telegram(env, 'answerPreCheckoutQuery', { pre_checkout_query_id: q.id, ok, ...(ok ? {} : { error_message: 'Unknown product' }) });
+  }
+  if (update.message && update.message.successful_payment) {
+    const sp = update.message.successful_payment;
+    const uid = update.message.from && update.message.from.id;
+    if (uid && String(sp.invoice_payload || '').startsWith('joinpro:')) {
+      await grantJoinPro(env, uid, sp.total_amount);
+      const fa = (update.message.from.language_code || '').startsWith('fa');
+      await plain(env, update.message.chat.id,
+        fa ? `✅ <b>مدیریت جوین اجباری فعال شد</b>\n\nاز این به بعد تا ${joinProLimit(env)} کانال و گروه را می‌توانی اجباری کنی.` : `✅ <b>Forced join manager unlocked</b>\n\nYou can now require up to ${joinProLimit(env)} chats.`,
+        { inline_keyboard: [[{ text: fa ? '🔒 تنظیم جوین' : '🔒 Set it up', callback_data: `join:${fa ? 'fa' : 'en'}`, style: 'success' }, { text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${fa ? 'fa' : 'en'}` }]] });
+      return;
+    }
+  }
+  if (update.message && update.message.successful_payment) return;
   const callback = update.callback_query;
   const message = callback?.message || update.message;
   const user = callback?.from || update.message?.from;
@@ -890,6 +945,7 @@ async function onUpdate(update, env, origin) {
       try {
         const chat = await telegram(env, 'getChat', { chat_id: Number(arg) });
         const list = await joinList(env);
+        if (list.length >= 1 && !list.some((t) => String(t.id) === String(chat.id)) && !(await hasJoinPro(env, chatId))) return joinPaywall(env, chatId, lang, origin, message.message_id);
         if (!list.some((t) => String(t.id) === String(chat.id))) {
           list.push({ id: chat.id, title: chat.title || chat.username || String(chat.id), type: chat.type, username: chat.username || '', invite: chat.invite_link || '' });
           await saveJoinList(env, list);
@@ -906,6 +962,24 @@ async function onUpdate(update, env, origin) {
     if (action === 'users') return adminList(env, chatId, lang, origin);
     if (action === 'settings') return settingsPanel(env, chatId, lang, origin, message.message_id);
     if (action === 'aiset') return aiPanel(env, chatId, lang, origin, message.message_id);
+    if (action === 'buyjoin') {
+      const price = joinProStars(env);
+      try {
+        const link = await telegram(env, 'createInvoiceLink', {
+          title: lang === 'fa' ? 'مدیریت جوین اجباری' : 'Forced join manager',
+          description: lang === 'fa' ? `عضویت اجباری روی تا ${joinProLimit(env)} کانال و گروه، پرداخت یک‌باره` : `Require up to ${joinProLimit(env)} chats, one-time payment`,
+          payload: `joinpro:${chatId}:${Date.now()}`,
+          currency: 'XTR',
+          prices: [{ label: lang === 'fa' ? 'مدیریت جوین اجباری' : 'Forced join manager', amount: price }]
+        });
+        return plain(env, chatId,
+          lang === 'fa' ? `<b>💫 پرداخت با استارز</b>\n\nمبلغ: <b>${price} ⭐</b>\nپس از پرداخت، قابلیت بلافاصله فعال می‌شود.` : `<b>💫 Pay with Stars</b>\n\nAmount: <b>${price} ⭐</b>\nThe feature unlocks right after payment.`,
+          { inline_keyboard: [[{ text: lang === 'fa' ? `پرداخت ${price} ⭐` : `Pay ${price} ⭐`, url: link, style: 'success' }], [{ text: lang === 'fa' ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }]] },
+          message.message_id);
+      } catch (e) {
+        return plain(env, chatId, `⛔ ${e.message}`, undefined, message.message_id);
+      }
+    }
     if (action === 'join') return joinPanel(env, chatId, lang, origin, message.message_id);
     if (action === 'destuse') {
       try {
@@ -1036,6 +1110,8 @@ async function onUpdate(update, env, origin) {
     try {
       const chat = await telegram(env, 'getChat', { chat_id: arg });
       const list = await joinList(env);
+      if (list.length >= 1 && !list.some((t) => String(t.id) === String(chat.id)) && !(await hasJoinPro(env, chatId))) return joinPaywall(env, chatId, detectedLang, origin);
+      if (list.length >= 1 && !list.some((t) => String(t.id) === String(chat.id)) && list.length >= joinProLimit(env)) return joinPanel(env, chatId, detectedLang, origin);
       if (!list.some((t) => String(t.id) === String(chat.id))) {
         list.push({ id: chat.id, title: chat.title || chat.username || String(chat.id), type: chat.type, username: chat.username || '', invite: chat.invite_link || '' });
         await saveJoinList(env, list);

@@ -26,6 +26,9 @@
     "PREMIUM_EMOJI": "1",
     // Forced join: comma-separated @username or -100… IDs at start; the owner
     // can extend or replace this list from chat with /join (stored in KV).
-    "JOIN_CHANNEL": "@Config7x"
+    "JOIN_CHANNEL": "@Config7x",
+    // Forced join manager: one chat is free, more needs a one-time Stars purchase.
+    "JOIN_PRO_STARS": "250",
+    "JOIN_PRO_LIMIT": "5"
   }
 }

@@ -178,12 +178,12 @@
 /* ── block library ─────────────────────────────────────────────── */
 .cmp-lib{border:1px solid var(--stroke,#243244);border-radius:16px;padding:12px;background:linear-gradient(180deg,rgba(108,231,189,.05),transparent);margin-bottom:14px}
 .cmp-lib-head{display:flex;align-items:center;gap:10px;justify-content:space-between;flex-wrap:wrap;margin-bottom:10px}
-.cmp-lib-title{display:flex;align-items:center;gap:6px;font-weight:700;font-size:13.5px}
-.cmp-lib-title small{background:#1d2b3a;color:#8fd9c2;border-radius:999px;padding:1px 7px;font-size:11px}
-.cmp-lib-search{flex:1;min-width:160px;border:1px solid #263547;background:#0f1721;color:inherit;border-radius:10px;padding:8px 10px;font-size:13px}
+.cmp-lib-title{display:flex;align-items:center;gap:6px;font-weight:700;font-size:14px}
+.cmp-lib-title small{background:#1d2b3a;color:#8fd9c2;border-radius:999px;padding:1px 7px;font-size:12.5px}
+.cmp-lib-search{flex:1;min-width:160px;border:1px solid #263547;background:#0f1721;color:inherit;border-radius:10px;padding:8px 10px;font-size:14px}
 .cmp-lib-cats{display:flex;gap:6px;overflow-x:auto;padding-bottom:8px;scrollbar-width:none}
 .cmp-lib-cats::-webkit-scrollbar{display:none}
-.cmp-chip{white-space:nowrap;border:1px solid #263547;background:#101a25;color:#b9c9d6;border-radius:999px;padding:6px 11px;font-size:12.5px;cursor:pointer;transition:.15s}
+.cmp-chip{white-space:nowrap;border:1px solid #263547;background:#101a25;color:#b9c9d6;border-radius:999px;padding:6px 11px;font-size:13.5px;cursor:pointer;transition:.15s}
 .cmp-chip small{opacity:.6;margin-inline-start:4px}
 .cmp-chip.on{background:#6ce7bd;border-color:#6ce7bd;color:#0d1a16;font-weight:700}
 .cmp-lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px;max-height:290px;overflow:auto;padding-inline-end:2px}
@@ -193,29 +193,29 @@
 .cmp-lib-item small{font-size:10.8px;color:#7e91a3;line-height:1.5}
 .cmp-lib-icon{font-size:16px;line-height:1}
 .cmp-lib-item .cmp-plus{position:absolute;top:8px;inset-inline-end:8px;opacity:.45}
-.cmp-lib-none{grid-column:1/-1;color:#7e91a3;font-size:12.5px;margin:6px 2px}
-.cmp-art-hint{font-size:12.5px;color:#8fa3b5;margin:0 0 8px}
+.cmp-lib-none{grid-column:1/-1;color:#7e91a3;font-size:13.5px;margin:6px 2px}
+.cmp-art-hint{font-size:13.5px;color:#8fa3b5;margin:0 0 8px}
 
 .cmp-hero{padding:22px 22px 18px}
 .cmp-hero h2{font-size:21px;line-height:1.4}
-.cmp-hero p{font-size:13px;line-height:1.75;max-width:60ch}
-.cmp-step{display:inline-flex;align-items:center;gap:7px;font-size:11.5px;color:#cfe6dc;
+.cmp-hero p{font-size:14px;line-height:1.75;max-width:60ch}
+.cmp-step{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;color:#cfe6dc;
   background:#12241f;border:1px solid #24443a;border-radius:999px;padding:5px 11px;margin:0 6px 6px 0}
 .cmp-step b{display:grid;place-items:center;width:18px;height:18px;border-radius:50%;
-  background:#6fe8c0;color:#0d2b23;font-size:11px}
+  background:#6fe8c0;color:#0d2b23;font-size:12.5px}
 .cmp-tpl{flex:0 0 128px!important;padding:11px 10px!important;border-radius:12px!important}
 .cmp-lib-grid{grid-template-columns:repeat(auto-fill,minmax(112px,1fr))!important;gap:9px!important}
 .cmp-lib-item{padding:11px 8px!important;border-radius:11px!important;line-height:1.5!important}
 .cmp-block{border-radius:12px!important}
 .cmp-block header{padding:11px 12px!important}
-.cmp-field input,.cmp-field textarea,.cmp-field select{min-height:38px;font-size:13px}
+.cmp-field input,.cmp-field textarea,.cmp-field select{min-height:38px;font-size:14px}
 .cmp-actions{position:sticky;bottom:0;padding:12px 0;background:linear-gradient(#0b0f1400,#0b0f14 55%)}
 @media (max-width:860px){
   .cmp-actions{bottom:64px}
   .cmp-lib-grid{grid-template-columns:repeat(auto-fill,minmax(96px,1fr))!important}
 }
 .cmp-quick{display:flex;gap:8px;margin-top:14px}
-.cmp-quick button{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 14px;border-radius:999px;font-size:12.5px;font-weight:600;
+.cmp-quick button{display:inline-flex;align-items:center;gap:7px;height:40px;padding:0 14px;border-radius:999px;font-size:13.5px;font-weight:600;
   background:var(--surface);border:1px solid var(--border);color:var(--text);transition:transform .14s var(--ease),border-color .14s}
 .cmp-quick button:first-child{color:var(--mint);border-color:#26443a;background:rgba(99,230,190,.07)}
 .cmp-quick button:nth-child(2){color:var(--gold);border-color:#3d3423;background:rgba(245,196,81,.07)}
@@ -224,10 +224,10 @@
 /* ── editor toolbar: undo / redo / collapse ───────────────────────── */
 .cmp-toolbar{display:flex;align-items:center;gap:6px;padding:8px;margin-bottom:12px;position:sticky;top:60px;z-index:8;
   background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(14px);border:1px solid var(--border-soft);border-radius:12px;box-shadow:var(--shadow-1)}
-.cmp-toolbar button{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:12px;color:var(--text);background:var(--surface);border:1px solid var(--border-soft);font-size:12px;font-weight:600;transition:transform .14s var(--ease),border-color .14s,opacity .14s}
+.cmp-toolbar button{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:12px;color:var(--text);background:var(--surface);border:1px solid var(--border-soft);font-size:12.5px;font-weight:600;transition:transform .14s var(--ease),border-color .14s,opacity .14s}
 .cmp-toolbar button:hover:not(:disabled){border-color:var(--mint)}
 .cmp-toolbar button:active:not(:disabled){transform:scale(.97)}
 .cmp-toolbar button:disabled{opacity:.38}
 .cmp-toolbar i{width:1px;height:20px;background:var(--border);margin:0 2px}
-.cmp-count{margin-inline-start:auto;font-size:11.5px;color:var(--muted);font-variant-numeric:tabular-nums;padding-inline:6px}
+.cmp-count{margin-inline-start:auto;font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums;padding-inline:6px}
 @media (max-width:480px){.cmp-toolbar button span{display:none}.cmp-toolbar button{width:40px;padding:0;justify-content:center}}
