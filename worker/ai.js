@@ -6,6 +6,7 @@ export const PROVIDERS = {
   openrouter:{ label: 'OpenRouter',base: 'https://openrouter.ai/api/v1', model: 'openai/gpt-4o-mini',      keyUrl: 'openrouter.ai/keys' },
   groq:     { label: 'Groq',       base: 'https://api.groq.com/openai/v1', model: 'llama-3.3-70b-versatile', keyUrl: 'console.groq.com/keys' },
   deepseek: { label: 'DeepSeek',   base: 'https://api.deepseek.com/v1',  model: 'deepseek-chat',          keyUrl: 'platform.deepseek.com' },
+  gemini:   { label: 'Google Gemini', base: 'https://generativelanguage.googleapis.com/v1beta/openai', model: 'gemini-2.0-flash', keyUrl: 'aistudio.google.com/apikey' },
 };
 
 const SYSTEM = `You are TeleRich's post writer for a Telegram channel.
@@ -29,7 +30,11 @@ export async function aiSave(env, uid, body) {
   const provider = String(body.provider || '').trim();
   if (!PROVIDERS[provider]) throw Object.assign(new Error('Unknown provider.'), { status: 400 });
   const rec = { provider, model: String(body.model || PROVIDERS[provider].model).slice(0, 80) };
-  if (typeof body.key === 'string' && body.key.trim()) rec.key = body.key.trim().slice(0, 200);
+  const incoming = typeof body.key === 'string' ? body.key.trim() : '';
+  if (incoming && provider === 'gemini' && !/^AIza[0-9A-Za-z_-]{20,}$/.test(incoming)) {
+    throw Object.assign(new Error('کلید Gemini باید با AIza شروع شود؛ از aistudio.google.com/apikey بگیرید.'), { status: 400 });
+  }
+  if (incoming) rec.key = incoming.slice(0, 200);
   else { const prev = await env.RICHKV.get('ai:' + uid, 'json'); if (prev?.key) rec.key = prev.key; }
   await env.RICHKV.put('ai:' + uid, JSON.stringify(rec));
   return { saved: true, provider: rec.provider, model: rec.model, hasKey: Boolean(rec.key || env.AI_KEY) };

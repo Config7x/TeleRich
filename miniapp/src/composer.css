@@ -223,8 +223,8 @@
 
 /* ── editor toolbar: undo / redo / collapse ───────────────────────── */
 .cmp-toolbar{display:flex;align-items:center;gap:6px;padding:8px;margin-bottom:12px;position:sticky;top:60px;z-index:8;
-  background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(14px);border:1px solid var(--border-soft);border-radius:var(--r-md);box-shadow:var(--shadow-1)}
-.cmp-toolbar button{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:var(--r-sm);color:var(--text);background:var(--surface);border:1px solid var(--border-soft);font-size:12px;font-weight:600;transition:transform .14s var(--ease),border-color .14s,opacity .14s}
+  background:color-mix(in srgb,var(--panel) 92%,transparent);backdrop-filter:blur(14px);border:1px solid var(--border-soft);border-radius:12px;box-shadow:var(--shadow-1)}
+.cmp-toolbar button{display:inline-flex;align-items:center;gap:6px;height:38px;padding:0 12px;border-radius:12px;color:var(--text);background:var(--surface);border:1px solid var(--border-soft);font-size:12px;font-weight:600;transition:transform .14s var(--ease),border-color .14s,opacity .14s}
 .cmp-toolbar button:hover:not(:disabled){border-color:var(--mint)}
 .cmp-toolbar button:active:not(:disabled){transform:scale(.97)}
 .cmp-toolbar button:disabled{opacity:.38}

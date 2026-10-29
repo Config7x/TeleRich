@@ -269,8 +269,8 @@ export default function App(){
    <div className="ai-status">{aiCfg?.hasKey?<><i className="dot ok"/>{t('Model ready: ','مدل آماده: ')+aiCfg.provider+' · '+aiCfg.model}</>:<><i className="dot warn"/>{t('Add a key below to switch AI on.','برای فعال شدن، کلید را پایین وارد کن.')}</>}</div>
    <details className="ai-config"><summary>{t('Model & key','مدل و کلید')}</summary>
     <div className="field-row"><label className="field"><span>{t('Provider','سرویس‌دهنده')}</span><select value={aiProvider} onChange={e=>{setAiProvider(e.target.value);setAiModel('');}}>{(aiCfg?.providers||[{id:'xai',label:'xAI Grok'}]).map((p:any)=><option key={p.id} value={p.id}>{p.label}</option>)}</select></label>
-    <label className="field"><span>{t('Model','مدل')}</span><input value={aiModel} onChange={e=>setAiModel(e.target.value)} placeholder="grok-4-fast"/></label></div>
-    <label className="field"><span>{t('API key','کلید API')}</span><input type="password" value={aiKey} onChange={e=>setAiKey(e.target.value)} placeholder="xai-…"/></label>
+    <label className="field"><span>{t('Model','مدل')}</span><input value={aiModel} onChange={e=>setAiModel(e.target.value)} placeholder={(aiCfg?.providers||[]).find((p:any)=>p.id===aiProvider)?.model||"model name"}/></label></div>
+    <label className="field"><span>{t('API key','کلید API')}</span><input type="password" value={aiKey} onChange={e=>setAiKey(e.target.value)} placeholder={aiProvider==='gemini'?'AIza…':aiProvider==='openrouter'?'sk-or-…':aiProvider==='groq'?'gsk_…':aiProvider==='deepseek'?'sk-…':'xai-…'}/></label>
     <div className="modal-actions"><button className="button subtle" onClick={testAi}>{t('Test','تست')}</button><button className="button secondary" onClick={saveAi}>{t('Save','ذخیره')}</button></div>
    </details>
    <div className="modal-actions"><button className="button primary" disabled={aiBusy} onClick={runAi}><Sparkles size={15}/>{aiBusy?t('Writing…','در حال نوشتن…'):t('Write my post','پست را بنویس')}</button></div>

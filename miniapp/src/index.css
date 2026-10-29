@@ -104,7 +104,7 @@ button{transition:background .16s ease,border-color .16s ease,transform .16s eas
   --text:#eef4f8; --muted:#8c99a6; --subtle:#5a6673;
   --mint:#63e6be; --mint-dark:#10312a; --mint-glow:rgba(99,230,190,.18);
   --danger:#ff6b6b; --gold:#f5c451;
-  --r-xs:8px; --r-sm:11px; --r-md:14px; --r-lg:18px; --r-xl:24px;
+  --r-xs:8px; --r-sm:12px; --r-md:14px; --r-lg:18px; --r-xl:24px;
   --shadow-1:0 1px 2px rgba(0,0,0,.4); --shadow-2:0 8px 24px -8px rgba(0,0,0,.6);
   --shadow-3:0 24px 60px -20px rgba(0,0,0,.75);
   --ease:cubic-bezier(.22,.8,.3,1);

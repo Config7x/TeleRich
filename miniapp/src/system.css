@@ -1,0 +1,91 @@
+/* ────────────────────────────────────────────────────────────────────
+   Design system normaliser.
+   Loaded last so it settles the inconsistencies the feature screens
+   drifted into: mixed radii, four button paddings, five icon sizes.
+   One scale for surfaces, one for controls, one for icons.
+   ──────────────────────────────────────────────────────────────────── */
+.app{
+  --r-card:16px;      /* panels, cards, modals bodies */
+  --r-tile:12px;      /* icon tiles, thumbnails */
+  --r-pill:999px;     /* chips, tabs, badges */
+  --ctl-sm:36px; --ctl-md:42px; --ctl-lg:48px;
+  --pad-card:18px; --gap-row:10px;
+}
+
+/* 1 · icons: one optical weight, one set of sizes ---------------------- */
+.app svg{stroke-width:1.8;flex:none}
+.app .tabbar svg{width:21px;height:21px}
+.app .nav-item svg{width:20px;height:20px}
+.app .button svg,.app .modal-actions svg{width:16px;height:16px}
+.app h1 svg,.app h2 svg,.app h3 svg{width:18px;height:18px;vertical-align:-3px}
+
+/* 2 · surfaces: two radii, one border, one shadow ---------------------- */
+.app .panel,.app .card,.app .content-page>section,.app .modal-card,.app .sheet{
+  border-radius:var(--r-card);border:1px solid var(--border-soft);box-shadow:none;padding:var(--pad-card);
+}
+.app .empty-state,.app .home-empty{border-radius:var(--r-card);border:1px dashed var(--border);background:transparent}
+.app .empty-icon,.app .stat-ico,.app .q-ico,.app .cmp-lib-icon,.app .r-ico{
+  border-radius:var(--r-tile);
+}
+
+/* 3 · controls: three heights only ------------------------------------- */
+.app .button,.app button.button,.app .modal-actions button{
+  height:var(--ctl-md);padding-inline:16px;border-radius:var(--r-tile);font-size:13.5px;font-weight:600;
+  display:inline-flex;align-items:center;justify-content:center;gap:7px;
+}
+.app .button.primary,.app .modal-actions button.primary{height:var(--ctl-lg);border-radius:14px;font-size:14px}
+.app .button.subtle,.app .text-button{height:var(--ctl-sm);padding-inline:12px;font-size:12.5px;border-radius:10px}
+.app .filter-tabs button,.app .templates-chips button,.app .tabs button,.app .cmp-lib-cats button{
+  height:34px;padding-inline:13px;border-radius:var(--r-pill);font-size:12px;font-weight:600;
+}
+.app .badge,.app kbd,.app .cmp-step,.app .template-badge,.app .template-chip-count{border-radius:var(--r-pill)}
+.app input,.app select,.app textarea,.app .field input,.app .field select,.app .field textarea{
+  border-radius:var(--r-tile);min-height:var(--ctl-md);
+}
+
+/* 4 · rhythm: section titles and rows ---------------------------------- */
+.app .content-page>section+section,.app .panel+.panel{margin-top:12px}
+.app .section-title,.app .panel>h2,.app .panel>h3{margin:0 0 10px;font-size:15px;font-weight:700;letter-spacing:-.01em}
+.app .recent-item,.app .home-recent .recent-item{min-height:60px;border-radius:14px}
+.app .list-row,.app .draft-row{min-height:60px;border-radius:14px}
+
+/* 5 · interrupters: one heading pattern everywhere --------------------- */
+.app .page-heading{border:0;background:transparent;padding:0 0 14px;margin:0}
+.app .page-heading h1{font-size:24px;letter-spacing:-.02em}
+.app .page-heading p,.app .eyebrow{color:var(--muted)}
+.app .eyebrow{font-size:10.5px;letter-spacing:.12em}
+
+/* 6 · accessibility ----------------------------------------------------- */
+.app :is(button,a,input,select,textarea):focus-visible{outline:2px solid var(--mint);outline-offset:2px;border-radius:var(--r-tile)}
+.app button{min-height:var(--ctl-sm)}
+.app .tabbar button,.app .nav-item{min-height:auto}
+
+/* 7 · the two spots that read as "off" -------------------------------- */
+/* a) sticky bars sat flush against the header with a double rule */
+.app .library-bar,.app .templates-controls{border:0;border-bottom:1px solid var(--border-soft);border-radius:0;background:transparent;padding:0 0 12px;margin-bottom:14px}
+/* b) preview phone frame and code box used the old radius next to new cards */
+.app .cmp-phone,.app .guide-example pre,.app .code-box{border-radius:var(--r-card)}
+
+@media (prefers-reduced-motion:reduce){.app *{animation:none!important;transition:none!important}}
+
+/* 8 · the actual components, named explicitly -------------------------- */
+.app .template-card,.app .stat-card,.app .quick-card,.app .panel,.app .card,
+.app .cmp-block,.app .cmp-phone,.app .guide-card,.app .draft-row,.app .list-row{
+  border-radius:var(--r-card);border:1px solid var(--border-soft);box-shadow:none;
+}
+.app .template-icon-tile,.app .stat-ico,.app .q-ico,.app .r-ico,.app .empty-icon,
+.app .cmp-lib-icon,.app .hm-i,.app .template-thumb-box{border-radius:var(--r-tile)}
+.app .home-hero,.app .cmp-hero{border-radius:20px}
+.app .template-card,.app .quick-card{padding:14px}
+.app .panel,.app .card{padding:var(--pad-card)}
+.app .template-use-btn,.app .cmp-apply,.app .cmp-ghost,.app .cmp-show-preview{
+  height:var(--ctl-md);padding-inline:14px;border-radius:var(--r-tile);font-size:13px;font-weight:600;
+}
+.app .cmp-apply{height:var(--ctl-lg);border-radius:14px;font-size:14px}
+/* one icon weight inside dense editors */
+.app .cmp-block-tools svg,.app .cmp-toolbar svg{width:14px;height:14px}
+.app .cmp-block-tools button{width:28px;height:28px;padding:0;border-radius:8px}
+.app .template-card-meta,.app .template-chip-count{font-size:11.5px}
+/* a stray 4px radius on table cells and inline code, next to 16px cards */
+.app .guide-example pre,.app .code-box,.app table td,.app table th{border-radius:0}
+.app .guide-example pre{border-radius:var(--r-card);padding:14px}

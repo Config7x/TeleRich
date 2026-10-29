@@ -60,7 +60,7 @@
   position: relative;
   overflow: hidden;
   padding: 24px 20px;
-  border-radius: var(--r-xl);
+  border-radius: 20px;
   background: linear-gradient(150deg, rgba(25, 32, 39, 0.95) 0%, var(--panel) 100%);
   border: 1px solid var(--border);
   box-shadow: var(--shadow-2);
@@ -142,7 +142,7 @@
   height: 76px;
   min-height: 76px;
   padding-inline: 18px;
-  border-radius: var(--r-xl);
+  border-radius: 20px;
   background: linear-gradient(135deg, #7bf0cb 0%, #4fdcb4 100%);
   color: #06231b;
   border: 1px solid rgba(255, 255, 255, 0.4);
@@ -168,7 +168,7 @@
 .home-hero .hero-cta .cta-ico {
   width: 46px;
   height: 46px;
-  border-radius: var(--r-md);
+  border-radius: 12px;
   background: rgba(6, 35, 27, 0.12);
   display: grid;
   place-items: center;
@@ -250,7 +250,7 @@
   padding: 14px 16px;
   background: var(--surface);
   border: 1px solid var(--border-soft);
-  border-radius: var(--r-lg);
+  border-radius: 16px;
   box-shadow: var(--shadow-1);
   transition: transform 0.2s var(--ease), border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s;
   box-sizing: border-box;
@@ -270,7 +270,7 @@
 .home-stats .stat-card .stat-ico {
   width: 34px;
   height: 34px;
-  border-radius: var(--r-sm);
+  border-radius: 12px;
   background: var(--panel);
   border: 1px solid var(--border-soft);
   color: var(--mint);
@@ -314,7 +314,7 @@
   padding: 16px;
   background: var(--surface);
   border: 1px solid var(--border-soft);
-  border-radius: var(--r-lg);
+  border-radius: 16px;
   box-shadow: var(--shadow-1);
   transition: transform 0.2s var(--ease), border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s;
   box-sizing: border-box;
@@ -334,7 +334,7 @@
 .home-grid .quick-card .q-ico {
   width: 42px;
   height: 42px;
-  border-radius: var(--r-md);
+  border-radius: 12px;
   display: grid;
   place-items: center;
   margin-bottom: 12px;
@@ -407,7 +407,7 @@
   min-height: 60px;
   background: var(--surface);
   border: 1px dashed var(--border);
-  border-radius: var(--r-lg);
+  border-radius: 16px;
   color: var(--muted);
   font-size: 13px;
   box-sizing: border-box;
@@ -436,7 +436,7 @@
   gap: 14px;
   background: var(--surface);
   border: 1px solid var(--border-soft);
-  border-radius: var(--r-lg);
+  border-radius: 16px;
   box-shadow: var(--shadow-1);
   text-align: start;
   transition: transform 0.2s var(--ease), border-color 0.2s var(--ease), box-shadow 0.2s var(--ease), background 0.2s;
@@ -457,7 +457,7 @@
 .home-recent .recent-item .r-ico {
   width: 38px;
   height: 38px;
-  border-radius: var(--r-md);
+  border-radius: 12px;
   background: var(--panel);
   border: 1px solid var(--border-soft);
   color: var(--mint);
