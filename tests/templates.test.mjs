@@ -11,7 +11,7 @@ const out = join(mkdtempSync(join(tmpdir(), 'tr-tpl-')), 'blocks.mjs');
 execFileSync('npx', ['esbuild', 'miniapp/src/blocks.ts', '--bundle', '--format=esm', `--outfile=${out}`, '--log-level=error']);
 const { templates, blocksToHtml } = await import(out);
 
-const required = ['config', 'notice', 'guide', 'offer', 'profile', 'welcome', 'report', 'buttonset', 'mediapost', 'levels', 'slides', 'livepoll'];
+const required = ['config', 'announce', 'guide', 'sale', 'profile', 'blank', 'welcome', 'report', 'buttonset', 'mediapost', 'levels', 'slides', 'livepoll'];
 
 test('every expected template ships', () => {
   const ids = templates.map((t) => t.id);
