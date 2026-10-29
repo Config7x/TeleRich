@@ -177,13 +177,11 @@ async function webApi(request, env, url) {
 
 function menu(lang, origin) {
   const fa = lang === 'fa';
-  const studio = { text: fa ? '✨ ساخت و ویرایش پست' : '✨ Create & edit a post', web_app: { url: origin }, style: 'primary' };
   return { inline_keyboard: [
-    [studio],
-    [{ text: fa ? '🎨 قالب‌های آماده' : '🎨 Ready templates', callback_data: `templates:${lang}` }, { text: fa ? '🧩 بلوک‌ها' : '🧩 Blocks', callback_data: `list:${lang}:Blocks:0` }],
+    [{ text: fa ? '✨ ساخت و ویرایش پست' : '✨ Create & edit a post', web_app: { url: origin }, style: 'primary' }],
+    [{ text: fa ? '🎨 قالب‌های آماده' : '🎨 Templates', callback_data: `templates:${lang}` }, { text: fa ? '🧩 بلوک‌ها' : '🧩 Blocks', callback_data: `list:${lang}:Blocks:0` }],
     [{ text: fa ? '📖 متن ریچ' : '📖 Rich text', callback_data: `list:${lang}:Rich text:0` }, { text: fa ? '🖼 مدیا' : '🖼 Media', callback_data: `list:${lang}:Media:0` }],
-    [{ text: fa ? '🚀 دموی کامل' : '🚀 Full demo', callback_data: `demo:${lang}:0`, style: 'success' }, { text: fa ? '🎁 سهمیه من' : '🎁 My quota', callback_data: `quota:${lang}` }],
-    [{ text: fa ? '📚 مرکز راهنما' : '📚 Help center', callback_data: `help:${lang}` }, { text: 'Bot API 10.3', callback_data: `updates:${lang}` }],
+    [{ text: fa ? '🚀 دمو' : '🚀 Demo', callback_data: `demo:${lang}:0`, style: 'success' }, { text: fa ? '🎁 سهمیه' : '🎁 Quota', callback_data: `quota:${lang}` }],
     [{ text: fa ? '🌐 English' : '🌐 فارسی', callback_data: `home:${fa ? 'en' : 'fa'}` }, { text: fa ? 'ℹ️ درباره' : 'ℹ️ About', callback_data: `about:${lang}` }]
   ] };
 }
@@ -230,27 +228,15 @@ async function templatesPanel(env, chatId, lang, origin, messageId) {
   return plain(env, chatId, text, { inline_keyboard: rows }, messageId);
 }
 
-async function helpCenter(env, chatId, lang, origin, messageId) {
-  const fa = lang === 'fa';
-  const text = `<b>${fa ? '📚 مرکز راهنما' : '📚 Help center'}</b>\n\n` +
-    (fa ? 'سه راه برای یادگیری: راهنماهای متنی، دموی زنده، و خود استودیو با پیش‌نمایش هم‌زمان.' : 'Three ways to learn: written guides, a live demo, and the studio with a live preview.') +
-    '\n\n' +
-    (fa
-      ? '• 📖 <b>متن ریچ</b> — همهٔ تگ‌ها و نمونه‌ها\n• 🧩 <b>بلوک‌ها</b> — جدول، دکمه، بخش بازشو، مدیا\n• 🖼 <b>مدیا</b> — عکس، آلبوم، فایل\n• 🚀 <b>دمو</b> — پستی که همه‌چیز را نشان می‌دهد'
-      : '• 📖 <b>Rich text</b> — every tag with examples\n• 🧩 <b>Blocks</b> — tables, buttons, collapsibles, media\n• 🖼 <b>Media</b> — photos, albums, files\n• 🚀 <b>Demo</b> — one post that shows it all');
-  return plain(env, chatId, text, { inline_keyboard: [
-    [{ text: fa ? '📖 متن ریچ' : '📖 Rich text', callback_data: `list:${lang}:Rich text:0` }, { text: fa ? '🧩 بلوک‌ها' : '🧩 Blocks', callback_data: `list:${lang}:Blocks:0` }],
-    [{ text: fa ? '🖼 مدیا' : '🖼 Media', callback_data: `list:${lang}:Media:0` }, { text: fa ? '🚀 دمو' : '🚀 Demo', callback_data: `demo:${lang}:0`, style: 'success' }],
-    [{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }],
-  ] }, messageId);
-}
-
 async function aboutPanel(env, chatId, lang, origin, messageId) {
   const fa = lang === 'fa';
   const text = `<b>TeleRich 7x</b>\n\n${fa ? 'استودیوی ساخت پست ریچ تلگرام — روی Cloudflare Workers.\n\n' : 'Telegram rich post studio — on Cloudflare Workers.\n\n'}` +
     '<a href="https://t.me/Rich7xbot">@Rich7xbot</a> · <a href="https://t.me/Config7x">@Config7x</a>' +
     (fa ? '\n\nدستورها: /start /post /ref /about /whoami' : '\n\nCommands: /start /post /ref /about /whoami');
-  return plain(env, chatId, text, foot(lang, origin), messageId);
+  return plain(env, chatId, text, { inline_keyboard: [
+    [{ text: fa ? '🆕 تازه‌های Bot API 10.3' : '🆕 Bot API 10.3 changes', callback_data: `updates:${lang}` }],
+    [{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }, { text: fa ? '✨ استودیو' : '✨ Studio', web_app: { url: origin }, style: 'primary' }],
+  ] }, messageId);
 }
 
 const back = (lang, origin) => ({ inline_keyboard: [[{ text: lang === 'fa' ? '← بازگشت به منو' : '← Back to menu', callback_data: `home:${lang}` }, { text: lang === 'fa' ? 'باز کردن استودیو' : 'Open studio', web_app: { url: origin }, style: 'primary' }]] });
@@ -712,7 +698,7 @@ async function onUpdate(update, env, origin) {
     if (action === 'bcstno') { await env.RICHKV.delete('bcast:' + chatId); return plain(env, chatId, lang === 'fa' ? '❌ ارسال همگانی لغو شد.' : '❌ Broadcast cancelled.', back(lang, origin)); }
     if (action === 'home') return home(env, chatId, lang, origin, message.message_id);
     if (action === 'templates') return templatesPanel(env, chatId, lang, origin, message.message_id);
-    if (action === 'help') return helpCenter(env, chatId, lang, origin, message.message_id);
+    if (action === 'help') return sendList(env, chatId, lang, 'Rich text', 0, origin, message.message_id);
     if (action === 'about') return aboutPanel(env, chatId, lang, origin, message.message_id);
     if (action === 'tpl') {
       await telegram(env, 'answerCallbackQuery', { callback_query_id: callback.id, text: lang === 'fa' ? 'داخل استودیو باز کن و قالب را انتخاب کن' : 'Open the studio and pick it there' });
@@ -744,7 +730,7 @@ async function onUpdate(update, env, origin) {
     const want = board[text.trim()];
     if (want === 'studio') return plain(env, chatId, detectedLang === 'fa' ? '✨ استودیو را باز کن؛ از دکمهٔ زیر شروع کن.' : '✨ Open the studio from the button below.', { inline_keyboard: [[{ text: detectedLang === 'fa' ? '✨ باز کردن استودیو' : '✨ Open studio', web_app: { url: origin }, style: 'primary' }]] });
     if (want === 'templates') return templatesPanel(env, chatId, detectedLang, origin);
-    if (want === 'help') return helpCenter(env, chatId, detectedLang, origin);
+    if (want === 'help') return sendList(env, chatId, detectedLang, 'Rich text', 0, origin);
     if (want === 'quota') return quotaPanel(env, chatId, detectedLang, origin);
   }
   if (command === '/start') {
@@ -827,7 +813,7 @@ export default {
       if (!env.WEBHOOK_SECRET || !await equal(received, env.WEBHOOK_SECRET)) return new Response('Unauthorized', { status: 401 });
       let update;
       try { update = await request.json(); } catch { return new Response('Invalid update', { status: 400 }); }
-      ctx.waitUntil(onUpdate(update, env, (env.PUBLIC_URL || url.origin) + '?v=20261031ui').catch(async error => {
+      ctx.waitUntil(onUpdate(update, env, (env.PUBLIC_URL || url.origin) + '?v=20261031menu').catch(async error => {
         // Log no tokens or source content. User-facing API errors help diagnose unsupported markup/media.
         console.error('TeleRich update error:', error.message);
         const chat = update.message?.chat || update.callback_query?.message?.chat;
