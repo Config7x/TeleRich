@@ -135,3 +135,73 @@
 .app.tg .modal,.app.tg .sheet{border-radius:14px!important}
 /* no decorative orbs anywhere */
 .app.tg .hero-orb,.app.tg .release-spark{display:none!important}
+
+/* ── hero card with a live message preview ─────────────────────────── */
+.app.tg .hero-card{
+  position:relative;padding:12px 12px 12px;border-radius:16px;
+  background:var(--surface);border:1px solid var(--divider);
+  box-shadow:0 1px 0 rgba(255,255,255,.03) inset;
+}
+.app.tg .hero-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.app.tg .hero-tag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--accent);letter-spacing:.2px}
+.app.tg .hero-tag i{width:6px;height:6px;border-radius:50%;background:var(--accent);display:block}
+.app.tg .hero-mode{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.6px;text-transform:uppercase}
+
+.app.tg .bubble{
+  border-radius:14px 14px 14px 5px;padding:11px 12px 12px;
+  background:var(--surface-2);border:1px solid var(--divider);
+}
+.app.tg .bubble-head{display:flex;align-items:center;gap:7px;margin-bottom:7px}
+.app.tg .bubble-flag{font-size:15px;line-height:1}
+.app.tg .bubble-head b{font-size:14px;font-weight:600;color:var(--text)}
+.app.tg .bubble-pill{
+  margin-inline-start:auto;font-size:11px;font-weight:600;color:var(--muted);
+  border:1px solid var(--divider);border-radius:9px;padding:1px 7px;
+}
+.app.tg .bubble-text{font-size:13px;line-height:1.55;color:var(--muted);margin-bottom:8px}
+.app.tg .bubble-code{
+  position:relative;margin:0 0 10px;padding:9px 10px 20px;border-radius:9px;
+  background:var(--bg);border:1px solid var(--divider);
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11.5px;line-height:1.5;
+  color:var(--text);direction:ltr;text-align:left;overflow:hidden;white-space:nowrap;
+}
+.app.tg .bubble-cite{
+  position:absolute;inset-inline-start:10px;bottom:5px;
+  font-family:inherit;font-size:10px;font-weight:600;color:var(--accent);
+}
+.app.tg .bubble-btns{display:flex;gap:7px}
+.app.tg .bb{
+  flex:1;display:grid;place-items:center;height:32px;border-radius:9px;
+  font-size:12.5px;font-weight:600;color:var(--muted);
+  background:var(--surface);border:1px solid var(--divider);
+}
+.app.tg .bb.is-primary{color:#fff;background:color-mix(in srgb,var(--accent) 82%,#000);border-color:transparent}
+
+.app.tg .hero-cta{
+  display:flex;align-items:center;gap:9px;width:100%;height:46px;margin-top:12px;padding:0 14px;
+  border:0;border-radius:12px;background:var(--accent);color:#fff;
+  font:inherit;font-size:15px;font-weight:600;cursor:pointer;
+}
+.app.tg .hero-cta span{flex:1;text-align:start}
+.app.tg .hero-cta .cta-ar{opacity:.9}
+.app.tg.persian .hero-cta .cta-ar{transform:scaleX(-1)}
+.app.tg .hero-cta:active{filter:brightness(.94)}
+
+/* ── quick tiles ───────────────────────────────────────────────────── */
+.app.tg .tile-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+.app.tg .tile{
+  display:flex;flex-direction:column;align-items:flex-start;gap:2px;
+  padding:12px;border-radius:14px;text-align:start;cursor:pointer;
+  background:var(--surface);border:1px solid var(--divider);color:var(--text);font:inherit;
+}
+.app.tg .tile:active{background:var(--surface-2)}
+.app.tg .tile-ico{
+  display:grid;place-items:center;width:32px;height:32px;border-radius:10px;margin-bottom:7px;
+  background:var(--surface-2);color:var(--muted);
+}
+.app.tg .tile-ico.tpl{color:#9dbcff}
+.app.tg .tile-ico.emo{color:#f2c56b}
+.app.tg .tile-ico.ai{color:#c9a0ff}
+.app.tg .tile-ico.code{color:#7fd8bd}
+.app.tg .tile b{font-size:14px;font-weight:600;line-height:1.3}
+.app.tg .tile small{font-size:11.5px;color:var(--muted);line-height:1.35}

@@ -264,26 +264,36 @@ async function addChannel(){if(!/^(@[A-Za-z][\w]{3,}|-100\d+)$/.test(channelId.t
    </header>
    <main dir={lang==='fa'?'rtl':'ltr'}>
     {page==='home'&&<div className="tg-page">
-     <button className="tg-primary" onClick={()=>navigate('compose')}><Plus size={19}/><span>{t('New post','پست جدید')}</span></button>
-     <div className="tg-group-label">{t('Tools','ابزارها')}</div>
-     <div className="tg-list">
-      <button className="tg-row" onClick={()=>navigate('templates')}><span className="tg-ico tpl"><Braces size={18}/></span><span className="tg-row-tx"><b>{t('Templates','الگوها')}</b><small>{t('13 ready-made posts','۱۳ پست آماده')}</small></span><ChevronRight size={17} className="tg-chev"/></button>
-      <button className="tg-row" onClick={()=>{setModal('emoji');loadEmoji();}}><span className="tg-ico emo"><Smile size={18}/></span><span className="tg-row-tx"><b>{t('Premium emoji','ایموجی پریمیوم')}</b><small>{t('Packs on text and buttons','پک‌ها روی متن و دکمه‌ها')}</small></span><ChevronRight size={17} className="tg-chev"/></button>
-      <button className="tg-row" onClick={()=>{setModal('ai');loadAi();}}><span className="tg-ico ai"><Sparkles size={18}/></span><span className="tg-row-tx"><b>{t('Write with AI','نوشتن با AI')}</b><small>{t('Describe it, get a post','توضیح بده، پست بگیر')}</small></span><ChevronRight size={17} className="tg-chev"/></button>
-      <button className="tg-row" onClick={()=>navigate('studio')}><span className="tg-ico code"><Layers size={18}/></span><span className="tg-row-tx"><b>{t('Code editor','ویرایشگر کد')}</b><small>{t('HTML and Markdown','HTML و مارک‌داون')}</small></span><ChevronRight size={17} className="tg-chev"/></button>
+     <section className="hero-card">
+      <div className="hero-top"><span className="hero-tag"><i/>{t('Live preview','پیش‌نمایش زنده')}</span><span className="hero-mode">TeleRich</span></div>
+      <div className="bubble" dir="rtl">
+       <div className="bubble-head"><span className="bubble-flag">🇩🇪</span><b>@Config7x</b><span className="bubble-pill">{t('Germany','آلمان')}</span></div>
+       <div className="bubble-text">{t('A rich post: heading, code block and glass buttons.','یک پست ریچ: تیتر، بلوک کد و دکمه‌های شیشه‌ای.')}</div>
+       <pre className="bubble-code">vless://8f2c4a…@de1.config7x:443<span className="bubble-cite">{t("tap to copy","برای کپی بزن")}</span></pre>
+       <div className="bubble-btns"><span className="bb is-primary">📋 {t('Copy config','کپی کانفیگ')}</span><span className="bb">📢 {t('Channel','کانال')}</span></div>
+      </div>
+      <button className="hero-cta" onClick={()=>navigate('compose')}><Wand2 size={18}/><span>{t('Create a post','ساخت پست جدید')}</span><ChevronRight size={18} className="cta-ar"/></button>
+     </section>
+
+     <div className="tile-grid">
+      <button className="tile" onClick={()=>navigate('templates')}><span className="tile-ico tpl"><Braces size={19}/></span><b>{t('Templates','الگوها')}</b><small>{t('13 ready to send','۱۳ آمادهٔ ارسال')}</small></button>
+      <button className="tile" onClick={()=>{setModal('emoji');loadEmoji();}}><span className="tile-ico emo"><Smile size={19}/></span><b>{t('Premium emoji','ایموجی پریمیوم')}</b><small>{t('On text and buttons','روی متن و دکمه')}</small></button>
+      <button className="tile" onClick={()=>{setModal('ai');loadAi();}}><span className="tile-ico ai"><Sparkles size={19}/></span><b>{t('Write with AI','نوشتن با AI')}</b><small>{t('Describe, get a post','توضیح بده، بگیر')}</small></button>
+      <button className="tile" onClick={()=>navigate('studio')}><span className="tile-ico code"><Layers size={19}/></span><b>{t('Code editor','ویرایشگر کد')}</b><small>{t('HTML and Markdown','HTML و مارک‌داون')}</small></button>
      </div>
+
      <div className="tg-group-label">{t('My work','کارهای من')}</div>
      <div className="tg-list">
       <button className="tg-row" onClick={()=>navigate('drafts')}><span className="tg-ico draft"><FileText size={18}/></span><span className="tg-row-tx"><b>{t('Drafts','پیش‌نویس‌ها')}</b><small>{drafts.length?t(drafts.length+' saved','‏'+drafts.length+' ذخیره‌شده'):t('Nothing saved yet','هنوز چیزی ذخیره نشده')}</small></span>{drafts.length>0&&<i className="tg-badge">{drafts.length}</i>}<ChevronRight size={17} className="tg-chev"/></button>
       <button className="tg-row" onClick={()=>navigate('channels')}><span className="tg-ico chan"><Megaphone size={18}/></span><span className="tg-row-tx"><b>{t('Channels','کانال‌ها')}</b><small>{channels.length?t(channels.length+' channels','‏'+channels.length+' کانال'):t('Add a destination','مقصد اضافه کن')}</small></span><ChevronRight size={17} className="tg-chev"/></button>
+      {drafts.slice(0,2).map((d:any)=><button key={d.id} className="tg-row" onClick={()=>{setSource(d.source);setMode(d.mode);navigate('studio');}}><span className="tg-ico draft"><FileText size={18}/></span><span className="tg-row-tx"><b>{plainText(d.title)||t('Untitled','بدون عنوان')}</b><small>{d.date}</small></span><ChevronRight size={17} className="tg-chev"/></button>)}
      </div>
+
      <div className="tg-group-label">{t('Help','راهنما')}</div>
      <div className="tg-list">
       <button className="tg-row" onClick={()=>navigate('guide')}><span className="tg-ico help"><BookOpen size={18}/></span><span className="tg-row-tx"><b>{t('Guide','راهنما')}</b><small>{t('Every feature explained','هر قابلیت با توضیح')}</small></span><ChevronRight size={17} className="tg-chev"/></button>
       <button className="tg-row" onClick={()=>navigate('updates')}><span className="tg-ico news"><Zap size={18}/></span><span className="tg-row-tx"><b>{t('What is new','تازه‌ها')}</b><small>{t('Bot API 10.3','نسخهٔ ۱۰.۳')}</small></span><ChevronRight size={17} className="tg-chev"/></button>
      </div>
-     {drafts.length>0&&<><div className="tg-group-label">{t('Recent','آخرین‌ها')}</div>
-      <div className="tg-list">{drafts.slice(0,2).map((d:any)=><button key={d.id} className="tg-row" onClick={()=>{setSource(d.source);setMode(d.mode);navigate('studio');}}><span className="tg-ico draft"><FileText size={18}/></span><span className="tg-row-tx"><b>{plainText(d.title)||t('Untitled','بدون عنوان')}</b><small>{d.date}</small></span><ChevronRight size={17} className="tg-chev"/></button>)}</div></>}
     </div>}
     {page==='compose'&&<Composer lang={lang} onAi={()=>{setModal('ai');loadAi();}} onEmoji={()=>{setModal('emoji');loadEmoji();}} onApply={(html)=>{setSource(html);setMode('html');notify(t('Loaded into the editor — press send when ready.','به ادیتور منتقل شد — هر وقت آماده بودی ارسال کن.'));navigate('studio');}}/>}
     {page==='studio'&&<>
