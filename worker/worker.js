@@ -30,6 +30,29 @@ import { decorateMarkup } from './board.js';
 import { premiumize as emojiPremiumize, mergeMaps as emojiMergeMaps, SEED_PACKS } from './emoji_engine.js';
 import { PROVIDERS, aiConfig, aiSave, aiGenerate, aiTest, emojiPacks, emojiAddPack, emojiRemovePack } from './ai.js';
 
+/** A tap must never fail the handler: a slow or expired callback query used to
+ *  abort the whole update, so nothing was rendered and the user saw only an error. */
+const ack = (env, id, extra = {}) => telegram(env, 'answerCallbackQuery', { callback_query_id: id, ...extra }).catch(() => {});
+
+const NO_RIGHTS = /(not enough rights|have no rights|member list is inaccessible|CHAT_ADMIN_REQUIRED|chat not found|PEER_ID_INVALID|bot is not a member|not a member of)/i;
+/** Telegram's raw wording is useless in chat; name the fix instead. */
+const rightsHint = (env, chatId) => {
+  const bot = String(env.BOT_USERNAME || 'rich7xapp').replace(/^@/, '');
+  return `ربات در این مقصد دسترسی ندارد و پیام نمی‌تواند ارسال شود.\n` +
+    `@${bot} باید در آن کانال یا گروه «ادمین» باشد با اجازهٔ ارسال پیام (Post messages).\n` +
+    `بعد از دادن دسترسی، همان پست را دوباره بفرست.\n\n` +
+    `The bot has no rights in this destination. Make @${bot} an admin with “Post messages”, then send again.`;
+};
+/** Delivery wrapper: same call, readable error. */
+async function deliver(env, method, data) {
+  try {
+    return await telegram(env, method, data);
+  } catch (error) {
+    if (NO_RIGHTS.test(String(error.message || ''))) throw fail(rightsHint(env), 400);
+    throw error;
+  }
+}
+
 async function telegram(env, method, data = {}) {
   if (!env.BOT_TOKEN) throw fail('BOT_TOKEN is not configured on the Worker.', 503);
   const send = payload => fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/${method}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
@@ -45,7 +68,7 @@ async function telegram(env, method, data = {}) {
   let response = await send(outbound);
   let body = await response.json();
   // Premium emoji are rejected on accounts without Premium: fall back to plain once.
-  if (!body.ok && /emoji|CUSTOM_EMOJI|BUTTON_/i.test(body.description || '') && !premiumOff(env)) {
+  if (!body.ok && /emoji|CUSTOM_EMOJI|BUTTON_|entit|style/i.test(body.description || '') && !premiumOff(env)) {
     console.error('PREMIUM-FALLBACK', method, body.description);
     markPremiumDead();
     outbound = stripPremium(outbound);
@@ -97,9 +120,11 @@ async function authorizeChat(env, identity, chatId) {
   if (identity.operator) {
     if (chat.type === 'channel' || chat.type === 'supergroup' || chat.type === 'group') {
       const me = await telegram(env, 'getMe');
-      const member = await telegram(env, 'getChatMember', { chat_id: chat.id, user_id: me.id });
-      if (!['administrator', 'creator'].includes(member.status)) throw fail('Add the bot as a chat administrator before publishing.', 403);
-      if (chat.type === 'channel' && member.status !== 'creator' && !member.can_post_messages) throw fail('The bot needs Post messages permission.', 403);
+      let member;
+      try { member = await telegram(env, 'getChatMember', { chat_id: chat.id, user_id: me.id }); }
+      catch { throw fail(rightsHint(env), 403); } // the bot is not in that chat at all
+      if (!['administrator', 'creator'].includes(member.status)) throw fail(rightsHint(env), 403);
+      if (chat.type === 'channel' && member.status !== 'creator' && !member.can_post_messages) throw fail(rightsHint(env), 403);
     }
     return chat;
   }
@@ -108,12 +133,15 @@ async function authorizeChat(env, identity, chatId) {
     return chat;
   }
   const me = await telegram(env, 'getMe');
-  const [user, bot] = await Promise.all([
-    telegram(env, 'getChatMember', { chat_id: chat.id, user_id: identity.user.id }),
-    telegram(env, 'getChatMember', { chat_id: chat.id, user_id: me.id })
-  ]);
-  if (!['administrator', 'creator'].includes(user.status)) throw fail('You must be an administrator of the destination.', 403);
-  if (!['administrator', 'creator'].includes(bot.status)) throw fail('The bot must be an administrator of the destination.', 403);
+  let user, bot;
+  try {
+    [user, bot] = await Promise.all([
+      telegram(env, 'getChatMember', { chat_id: chat.id, user_id: identity.user.id }),
+      telegram(env, 'getChatMember', { chat_id: chat.id, user_id: me.id })
+    ]);
+  } catch { throw fail(rightsHint(env), 403); }
+  if (!['administrator', 'creator'].includes(user.status)) throw fail(rightsHint(env), 403);
+  if (!['administrator', 'creator'].includes(bot.status)) throw fail(rightsHint(env), 403);
   if (chat.type === 'channel' && bot.status !== 'creator' && !bot.can_post_messages) throw fail('The bot needs Post messages permission.', 403);
   return chat;
 }
@@ -224,15 +252,15 @@ async function webApi(request, env, url) {
     }
     const fields = copyFields(data, ['disable_notification', 'protect_content', 'ephemeral_message_parameters', 'reply_markup', 'reply_parameters', 'message_thread_id']);
     if (fields.ephemeral_message_parameters && chat.type === 'channel') throw fail('Ephemeral messages are not supported in channels. Use a group.');
-    const sent = await telegram(env, 'sendRichMessage', { ...fields, chat_id: chat.id, rich_message: withFooter(validateRich(data.rich_message)) });
+    const sent = await deliver(env, 'sendRichMessage', { ...fields, chat_id: chat.id, rich_message: withFooter(validateRich(data.rich_message)) });
     if (uid && !identity.operator && chargeable) await addUsed(env, uid);
     await bumpStats(env, { sends: 1, channel: chat.type === 'channel' ? 1 : 0 });
     return sent;
   }
-  if (action === 'draft') return telegram(env, 'sendRichMessageDraft', { ...copyFields(data, ['draft_id', 'can_stop', 'keep_on_stop', 'message_thread_id']), chat_id: chat.id, rich_message: withFooter(validateRich(data.rich_message)) });
+  if (action === 'draft') return deliver(env, 'sendRichMessageDraft', { ...copyFields(data, ['draft_id', 'can_stop', 'keep_on_stop', 'message_thread_id']), chat_id: chat.id, rich_message: withFooter(validateRich(data.rich_message)) });
   if (action === 'edit') {
     if (!Number.isSafeInteger(data.message_id)) throw fail('A valid message_id is required.');
-    return telegram(env, 'editMessageText', { chat_id: chat.id, message_id: data.message_id, rich_message: withFooter(validateRich(data.rich_message)), ...copyFields(data, ['reply_markup']) });
+    return deliver(env, 'editMessageText', { chat_id: chat.id, message_id: data.message_id, rich_message: withFooter(validateRich(data.rich_message)), ...copyFields(data, ['reply_markup']) });
   }
   if (action === 'delete') {
     if (!Number.isSafeInteger(data.message_id)) throw fail('A valid message_id is required.');
@@ -368,8 +396,11 @@ async function destPanel(env, chatId, lang, origin, messageId) {
     `\n\n${fa ? 'چطور تنظیم کنم؟' : 'How to set it?'}\n` +
     (fa ? '• یک پیام از گروه یا کانال به همین ربات <b>فوروارد</b> کن — خودش تشخیص می‌دهد.\n• یا بنویس <code>/dest @username</code> یا <code>/dest -100…</code>' : '• <b>Forward</b> any message from the group or channel here and I pick it up.\n• Or send <code>/dest @username</code> / <code>/dest -100…</code>') +
     `\n\n${fa ? 'ربات باید در گروه عضو و مدیر باشد (مجوز ارسال پیام).' : 'The bot must be an admin in that chat with Post messages permission.'}`;
+  const me = await telegram(env, 'getMe').catch(() => null);
+  const botUser = (me && me.username) || 'rich7xapp';
   const rows = [];
   rows.push([{ text: fa ? '✨ باز کردن استودیو' : '✨ Open the studio', web_app: { url: origin }, style: 'primary' }]);
+  rows.push([{ text: fa ? '➕ افزودن ربات به کانال' : '➕ Add the bot to your channel', url: `https://t.me/${botUser}?startchannel=true&admin=post_messages+edit_messages` }]);
   rows.push([{ text: fa ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }]);
   if (d) rows.push([{ text: fa ? '🗑 پاک کردن مقصد' : '🗑 Clear destination', callback_data: `destclear:${lang}`, style: 'danger' }]);
   return plain(env, chatId, text, { inline_keyboard: rows }, messageId);
@@ -828,7 +859,7 @@ async function joinGate(env, chatId, user, origin, callback) {
     : `🔒 <b>Join required</b>\n\nJoin ${targets.length > 1 ? 'all of these' : 'this chat'} first, then tap below.`;
   const kb = { inline_keyboard: rows };
   if (callback) {
-    try { await telegram(env, 'answerCallbackQuery', { callback_query_id: callback.id, text: fa ? '\ud83d\udd12 \u0627\u0648\u0644 \u0639\u0636\u0648 \u06a9\u0627\u0646\u0627\u0644 \u0634\u0648' : '\ud83d\udd12 Join the channel first', show_alert: true }); } catch (e) {}
+    try { await ack(env, callback.id, { text: fa ? '\ud83d\udd12 \u0627\u0648\u0644 \u0639\u0636\u0648 \u06a9\u0627\u0646\u0627\u0644 \u0634\u0648' : '\ud83d\udd12 Join the channel first', show_alert: true }); } catch (e) {}
   }
   await telegram(env, 'sendMessage', { chat_id: chatId, text, parse_mode: 'HTML', reply_markup: kb });
   return false;
@@ -844,7 +875,7 @@ async function onUpdate(update, env, origin) {
     return sendWhoami(env, message.chat.id, user.language_code?.startsWith('fa') ? 'fa' : 'en', origin, user);
   }
   if (!allowed(env, user.id)) {
-    if (callback) await telegram(env, 'answerCallbackQuery', { callback_query_id: callback.id, text: 'Access restricted / دسترسی محدود', show_alert: true });
+    if (callback) await ack(env, callback.id, { text: 'Access restricted / دسترسی محدود', show_alert: true });
     else if (message.chat.type === 'private') await plain(env, message.chat.id, 'Access restricted / دسترسی محدود');
     return;
   }
@@ -861,16 +892,16 @@ async function onUpdate(update, env, origin) {
     const lang = rawLang === 'fa' ? 'fa' : 'en';
     if (action === 'joincheck') {
       const st = await isMember(env, user.id);
-      if (st === 'unknown') { await telegram(env, 'answerCallbackQuery', { callback_query_id: callback.id, text: '\u26a0\ufe0f check unavailable, try again', show_alert: true }); return; }
+      if (st === 'unknown') { await ack(env, callback.id, { text: '\u26a0\ufe0f check unavailable, try again', show_alert: true }); return; }
       if (st === 'yes') {
-        await telegram(env, 'answerCallbackQuery', { callback_query_id: callback.id, text: lang === 'fa' ? '\u2705 \u062e\u0648\u0634 \u0622\u0645\u062f\u06cc!' : '\u2705 Welcome!' });
+        await ack(env, callback.id, { text: lang === 'fa' ? '\u2705 \u062e\u0648\u0634 \u0622\u0645\u062f\u06cc!' : '\u2705 Welcome!' });
         await settleRef(env, user);
         return home(env, chatId, lang, origin, message.message_id);
       }
-      await telegram(env, 'answerCallbackQuery', { callback_query_id: callback.id, text: lang === 'fa' ? '\u0647\u0646\u0648\u0632 \u0639\u0636\u0648 \u06a9\u0627\u0646\u0627\u0644 \u0646\u06cc\u0633\u062a\u06cc!' : 'Still not a member!', show_alert: true });
+      await ack(env, callback.id, { text: lang === 'fa' ? '\u0647\u0646\u0648\u0632 \u0639\u0636\u0648 \u06a9\u0627\u0646\u0627\u0644 \u0646\u06cc\u0633\u062a\u06cc!' : 'Still not a member!', show_alert: true });
       return;
     }
-    await telegram(env, 'answerCallbackQuery', { callback_query_id: callback.id, text: ['home','list','guide','render','demo','updates','publish','edit','delete','quota','bcstgo','bcstno','templates','help','about','tpl'].includes(action) ? undefined : `Callback: ${callback.data || ''}` });
+    await ack(env, callback.id, { text: ['home','list','guide','render','demo','updates','publish','edit','delete','quota','bcstgo','bcstno','templates','help','about','tpl'].includes(action) ? undefined : `Callback: ${callback.data || ''}` });
     if (action === 'quota') return quotaPanel(env, chatId, lang, origin, message.message_id);
     const parts = (callback.data || '').split(':');
     if (action === 'admp') return adminList(env, chatId, lang, origin, Number(parts[2]) || 0);
@@ -883,7 +914,7 @@ async function onUpdate(update, env, origin) {
     if (action === 'help') return sendList(env, chatId, lang, 'Rich text', 0, origin, message.message_id);
     if (action === 'about') return aboutPanel(env, chatId, lang, origin, message.message_id);
     if (action === 'tpl') {
-      await telegram(env, 'answerCallbackQuery', { callback_query_id: callback.id, text: lang === 'fa' ? 'داخل استودیو باز کن و قالب را انتخاب کن' : 'Open the studio and pick it there' });
+      await ack(env, callback.id, { text: lang === 'fa' ? 'داخل استودیو باز کن و قالب را انتخاب کن' : 'Open the studio and pick it there' });
       const tpl = TEMPLATES.find((x) => x.id === arg);
       return plain(env, chatId, `<b>${tpl ? tpl.icon + ' ' + (lang === 'fa' ? tpl.fa : tpl.en) : 'Template'}</b>\n\n` + (lang === 'fa' ? 'استودیو را باز کن، از نوار قالب‌ها همین را بزن؛ محتوای آماده روی بوم می‌نشیند.' : 'Open the studio and tap it in the template strip; the content lands on your canvas.'), { inline_keyboard: [[{ text: lang === 'fa' ? '✨ باز کردن استودیو' : '✨ Open studio', web_app: { url: origin }, style: 'primary' }], [{ text: lang === 'fa' ? '← قالب‌ها' : '← Templates', callback_data: `templates:${lang}` }, { text: lang === 'fa' ? '🏠 منو' : '🏠 Menu', callback_data: `home:${lang}` }]] }, message.message_id);
     }

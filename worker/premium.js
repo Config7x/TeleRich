@@ -118,6 +118,7 @@ export function stripPremium(data) {
     if (Array.isArray(value)) return value.map(walk);
     if (value && typeof value === 'object') {
       delete value.icon_custom_emoji_id;
+      delete value.style;
       for (const key of Object.keys(value)) value[key] = walk(value[key]);
     }
     return value;
