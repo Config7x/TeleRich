@@ -33,7 +33,7 @@ function Modal({title,children,onClose,wide=false}:{title:string;children:ReactN
 function Highlight({text}:{text:string}){return <>{text.split(/(<\/?[a-z][^>]*>|\*\*[^*]+\*\*|\*[^*]+\*|^#{1,6} .*$|^>.*$|^- |https?:\/\/[^\s"<]+)/gim).map((s,i)=><span key={i} className={s.startsWith('<')?'syntax-tag':s.startsWith('#')?'syntax-heading':s.startsWith('**')?'syntax-bold':s.startsWith('*')?'syntax-italic':s.startsWith('>')?'syntax-quote':s.startsWith('http')?'syntax-link':s==='- '?'syntax-tag':''}>{s}</span>)}</>;}
 
 export default function App(){
- const [lang,setLang]=useState<'en'|'fa'>(readStore('tr-lang','en'));
+ const [lang,setLang]=useState<'en'|'fa'>(readStore('tr-lang',((window as any).Telegram?.WebApp?.initDataUnsafe?.user?.language_code||'fa').startsWith('en')?'en':'fa'));
  const t=(en:string,fa:string)=>lang==='fa'?fa:en;
  const [page,setPage]=useState<Page>('home');
  const [source,setSourceRaw]=useState<string>(readUser('tr-source',STARTER));

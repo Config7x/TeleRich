@@ -7,3 +7,5 @@ worker/index.js
 .dev.vars
 .env
 .env.*
+*.png
+server.log

@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import {ArrowDown, ArrowUp, Check, ChevronDown, Copy, Layers, Plus, Sparkles, Trash2, Wand2, X, Eye, Send, Smile} from 'lucide-react';
+import { useMemo, useState, useEffect} from 'react';
+import {ArrowDown, ArrowUp, Check, ChevronDown, Copy, Layers, Plus, Sparkles, Trash2, Wand2, X, Eye, Send, Smile, Undo2, Redo2, ChevronsUpDown, ChevronsUp} from 'lucide-react';
 import { RichPreview, detectRtl } from './Renderer';
 import { KINDS, CATS, KIND_MAP, countIn } from './library';
 import {
@@ -78,11 +78,50 @@ export default function Composer({ lang, onApply, onAi, onEmoji }: Props) {
   }, [q, cat]);
 
   const html = useMemo(() => blocksToHtml(blocks), [blocks]);
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      const tag = (e.target as HTMLElement)?.tagName;
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+      if (e.key.toLowerCase() === 'z') { e.preventDefault(); e.shiftKey ? redo() : undo(); }
+      if (e.key.toLowerCase() === 'y') { e.preventDefault(); redo(); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
   const addArt = (key: string) => add(newArt(key));
 
+  const [past, setPast] = useState<Block[][]>([]);
+  const [future, setFuture] = useState<Block[][]>([]);
   const commit = (next: Block[]) => {
+    setPast((p) => [...p.slice(-39), blocks]);
+    setFuture([]);
     setBlocks(next);
     save('tr-blocks', next);
+  };
+  const undo = () => {
+    if (!past.length) return;
+    const prev = past[past.length - 1];
+    setPast(past.slice(0, -1));
+    setFuture((f) => [blocks, ...f]);
+    setBlocks(prev);
+    save('tr-blocks', prev);
+  };
+  const redo = () => {
+    if (!future.length) return;
+    const nxt = future[0];
+    setFuture(future.slice(1));
+    setPast((p) => [...p, blocks]);
+    setBlocks(nxt);
+    save('tr-blocks', nxt);
+  };
+  const moveTo = (id: string, to: 'top' | 'bottom') => {
+    const i = blocks.findIndex((b) => b.id === id);
+    if (i < 0) return;
+    const next = [...blocks];
+    const [it] = next.splice(i, 1);
+    to === 'top' ? next.unshift(it) : next.push(it);
+    commit(next);
   };
 
   const update = (id: string, patch: Record<string, unknown>) =>
@@ -211,6 +250,13 @@ export default function Composer({ lang, onApply, onAi, onEmoji }: Props) {
             </div>
           )}
 
+          <div className="cmp-toolbar" role="toolbar" aria-label={t('Editor tools', 'ابزارهای ویرایش')}>
+            <button onClick={undo} disabled={!past.length} aria-label={t('Undo', 'برگشت')}><Undo2 size={16} /><span>{t('Undo', 'برگشت')}</span></button>
+            <button onClick={redo} disabled={!future.length} aria-label={t('Redo', 'جلو')}><Redo2 size={16} /><span>{t('Redo', 'جلو')}</span></button>
+            <i />
+            <button onClick={()=>setOpenId(null)} aria-label={t('Collapse all', 'بستن همه')}><ChevronsUpDown size={16} /><span>{t('Collapse', 'بستن همه')}</span></button>
+            <span className="cmp-count">{blocks.length} {t('blocks', 'بلوک')}</span>
+          </div>
           <div className="cmp-blocks">
             {blocks.map((block, i) => {
               const open = openId === block.id;
@@ -223,7 +269,8 @@ export default function Composer({ lang, onApply, onAi, onEmoji }: Props) {
                     <span className="cmp-block-tools" onClick={(e) => e.stopPropagation()}>
                       <button onClick={() => move(block.id, -1)} disabled={i === 0} aria-label="up"><ArrowUp size={14} /></button>
                       <button onClick={() => move(block.id, 1)} disabled={i === blocks.length - 1} aria-label="down"><ArrowDown size={14} /></button>
-                      <button onClick={() => duplicate(block.id)} aria-label="duplicate"><Copy size={13} /></button>
+                      <button onClick={() => moveTo(block.id, 'top')} disabled={i === 0} aria-label="to top" title={t('Move to top', 'انتقال به بالا')}><ChevronsUp size={14} /></button>
+                      <button onClick={() => duplicate(block.id)} aria-label="duplicate" title={t('Duplicate', 'کپی بلوک')}><Copy size={13} /></button>
                       <button className="danger" onClick={() => remove(block.id)} aria-label="delete"><Trash2 size={13} /></button>
                     </span>
                     <ChevronDown size={16} className="cmp-caret" />
